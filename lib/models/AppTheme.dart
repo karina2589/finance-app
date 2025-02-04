@@ -23,19 +23,36 @@ class AppTheme {
           fontWeight: FontWeight.bold,
         ),
       ),
+
       textTheme: const TextTheme(
         bodyLarge: TextStyle(
           color: textColor,
+          fontSize: 17,
+            fontWeight: FontWeight.w500
+        ),
+        titleLarge: TextStyle(
+          color: textColor,
+          fontSize: 25,
+          fontWeight: FontWeight.w500
+        ),
+        titleMedium: TextStyle(
+          fontWeight: FontWeight.w400,
+          fontSize: 20,
+          color: textColor
+        ),
+        titleSmall: TextStyle(
           fontSize: 16,
+          color: textColor,
+          fontWeight: FontWeight.w400
         ),
         bodyMedium: TextStyle(
           color: textColor,
-          fontSize: 14,
+          fontSize: 16,
         ),
         headlineLarge: TextStyle(
           color: textColor,
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
+          fontSize: 22,
+          fontWeight: FontWeight.w500,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(

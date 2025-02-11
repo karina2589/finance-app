@@ -52,7 +52,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Account details', style: Theme.of(context).textTheme.bodyLarge),
+              Text('Account details', style: Theme.of(context).textTheme.titleMedium),
               SizedBox(height: 10),
               _buildEditableRow("Name", _nameController),
               _buildEditableRow("Surname", _surnameController),
@@ -73,7 +73,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
 
   Widget _buildEditableRow(String label, TextEditingController controller) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
           SizedBox(width: 80, child: Text(label, style: Theme.of(context).textTheme.titleSmall)),
@@ -82,12 +82,18 @@ class _UserInfoCardState extends State<UserInfoCard> {
                 ? TextField(
               controller: controller,
               onChanged: _onTextChanged,
+              style: Theme.of(context).textTheme.titleSmall,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 8),
               ),
             )
-                : Text(controller.text, style: Theme.of(context).textTheme.bodyMedium),
+                : Container(
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey))),
+              child: Text(controller.text, style: Theme.of(context).textTheme.titleSmall),
+            )
+            // Text(controller.text, style: Theme.of(context).textTheme.bodyMedium, ),
           ),
         ],
       ),

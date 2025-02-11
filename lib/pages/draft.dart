@@ -1,175 +1,114 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: Scaffold(
-      appBar: AppBar(title: Text('Work Card List')),
-      body: EditableWorkCards(),
-    ),
-  ));
-}
+void main() => runApp(const BankCardsApp());
 
-class EditableWorkCards extends StatefulWidget {
-  @override
-  _EditableWorkCardsState createState() => _EditableWorkCardsState();
-}
-
-class _EditableWorkCardsState extends State<EditableWorkCards> {
-  List<WorkCardData> workCards = [];
-  final List<String> workTypes = ['Full-Time', 'Part-Time', 'Freelance'];
-
-  // Добавление новой карточки
-  void _addWorkCard() {
-    setState(() {
-      workCards.add(WorkCardData(type: workTypes[0], salary: ''));
-    });
-  }
-
-  // Обновление данных карточки
-  void _updateWorkCard(int index, String type, String salary) {
-    setState(() {
-      workCards[index] = WorkCardData(type: type, salary: salary);
-    });
-  }
-
-  // Удаление карточки
-  void _deleteWorkCard(int index) {
-    setState(() {
-      workCards.removeAt(index);
-    });
-  }
-
-  // Сохранение карточек с проверкой
-  void _saveWorkCards() {
-    bool hasEmptyFields = workCards.any((card) => card.salary.trim().isEmpty);
-
-    if (hasEmptyFields) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all salary fields before saving!')),
-      );
-      return;
-    }
-
-    // Сохранение данных (здесь можно заменить на API-запрос или локальное хранилище)
-    for (var card in workCards) {
-      print('Saved: ${card.type}, Salary: ${card.salary}');
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Work cards saved successfully!')),
-    );
-  }
+class BankCardsApp extends StatelessWidget {
+  const BankCardsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Кнопки "Добавить" и "Сохранить"
-
-        Expanded(
-          child: ListView.builder(
-            itemCount: workCards.length,
-            itemBuilder: (context, index) {
-              return WorkCard(
-                data: workCards[index],
-                workTypes: workTypes,
-                onChanged: (String type, String salary) {
-                  _updateWorkCard(index, type, salary);
-                },
-                onDelete: () {
-                  _deleteWorkCard(index);
-                },
-              );
-            },
-          ),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            ElevatedButton(
-              onPressed: _addWorkCard,
-              child: Text('Add Work Card'),
-            ),
-            ElevatedButton(
-              onPressed: _saveWorkCards,
-              child: Text('Save Work Cards'),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class WorkCard extends StatelessWidget {
-  final WorkCardData data;
-  final List<String> workTypes;
-  final void Function(String, String) onChanged;
-  final VoidCallback onDelete;
-
-  WorkCard({
-    required this.data,
-    required this.workTypes,
-    required this.onChanged,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    TextEditingController salaryController = TextEditingController(text: data.salary);
-
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: DropdownButton<String>(
-                value: data.type,
-                isExpanded: true,
-                onChanged: (newType) {
-                  if (newType != null) {
-                    onChanged(newType, data.salary);
-                  }
-                },
-                items: workTypes.map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(type),
-                  );
-                }).toList(),
-              ),
-            ),
-            SizedBox(width: 20),
-            Expanded(
-              child: TextField(
-                controller: salaryController,
-                decoration: InputDecoration(
-                  labelText: 'Salary',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (newSalary) {
-                  onChanged(data.type, newSalary);
-                },
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
-              onPressed: onDelete,
-            ),
-          ],
-        ),
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Bank Cards')),
+        body: const BankCardsView(),
       ),
     );
   }
 }
 
-class WorkCardData {
-  String type;
-  String salary;
+class BankCardsView extends StatefulWidget {
+  const BankCardsView({super.key});
 
-  WorkCardData({required this.type, required this.salary});
+  @override
+  State<BankCardsView> createState() => _BankCardsViewState();
+}
+
+class _BankCardsViewState extends State<BankCardsView> {
+  late PageController _pageViewController;
+
+  final List<Map<String, String>> _cards = [
+    {"bank": "Visa", "balance": "\$1,250.75", "cardNumber": "**** 5678"},
+    {"bank": "MasterCard", "balance": "\$3,420.00", "cardNumber": "**** 1234"},
+    {"bank": "American Express", "balance": "\$980.50", "cardNumber": "**** 9876"},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageViewController = PageController(viewportFraction: 0.85); // Видим часть следующей карты
+  }
+
+  @override
+  void dispose() {
+    _pageViewController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+        height: 250,
+        child: PageView.builder(
+      controller: _pageViewController,
+      itemCount: _cards.length,
+      itemBuilder: (context, index) {
+        final card = _cards[index];
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+          child: BankCard(
+            bankName: card["bank"]!,
+            balance: card["balance"]!,
+            cardNumber: card["cardNumber"]!,
+          ),
+        );
+      },
+    ));
+  }
+}
+
+class BankCard extends StatelessWidget {
+  final String bankName;
+  final String balance;
+  final String cardNumber;
+
+  const BankCard({
+    super.key,
+    required this.bankName,
+    required this.balance,
+    required this.cardNumber,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 4,
+      color: Colors.blueAccent,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade400, Colors.blue.shade700],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(bankName, style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
+            Text("Income", style: TextStyle(fontSize: 16, color: Colors.white70)),
+            Text(balance, style: TextStyle(fontSize: 26, color: Colors.white, fontWeight: FontWeight.bold)),
+            SizedBox(height: 10,)
+          ],
+        ),
+      ),
+    )
+    );
+  }
 }

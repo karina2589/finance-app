@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_frontend/models/AppTheme.dart';
 import 'package:flutter_frontend/models/EditableSalaryCard.dart';
 import 'package:flutter_frontend/models/UserInfoCard.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import '../models/EditableTextRow.dart';
+//
 // void main() {
 //   runApp(MaterialApp(home: Profile(), theme: AppTheme.lightTheme,));
 // }
@@ -18,15 +21,14 @@ class Profile extends StatelessWidget {
                 child: Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Padding(
-            padding: EdgeInsets.symmetric(vertical: 20),
-            child: CircleAvatar(
-              radius: 55,
-              backgroundColor: AppTheme.iconsSecond,
-            )),
-        Text(
-          'Robert Johnson',
-          style: Theme.of(context).textTheme.titleLarge,
+        Container(
+          decoration: BoxDecoration(
+            border: Border.symmetric(horizontal: BorderSide(color: AppTheme.widgetColor, width: 2))
+          ),
+          child: Padding(padding: EdgeInsets.symmetric(vertical: 15), child: Text(
+              'Robert Johnson',
+              style:   GoogleFonts.inder(textStyle: Theme.of(context).textTheme.titleLarge)
+          ),),
         ),
        UserInfoCard(),
         SizedBox(
@@ -36,7 +38,6 @@ class Profile extends StatelessWidget {
       ],
     ))));
   }
-
 }
 
 

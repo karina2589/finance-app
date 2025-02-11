@@ -141,13 +141,14 @@ class SalaryCard extends StatelessWidget {
       color: AppTheme.accentColor,
       margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(15.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
               child: DropdownButton<String>(
                 value: data.workType,
+                style: Theme.of(context).textTheme.titleSmall,
                 isExpanded: true,
                 onChanged: (newType) {
                   if (newType != null) {
@@ -157,7 +158,7 @@ class SalaryCard extends StatelessWidget {
                 items: workTypes.map((type) {
                   return DropdownMenuItem(
                     value: type,
-                    child: Text(type),
+                    child: Text(type, style: Theme.of(context).textTheme.titleSmall),
                   );
                 }).toList(),
               ),
@@ -166,8 +167,10 @@ class SalaryCard extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: salaryController,
+                style: Theme.of(context).textTheme.titleSmall,
                 decoration: InputDecoration(
                   labelText: 'Amount \$',
+                  labelStyle: Theme.of(context).textTheme.titleSmall,
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,

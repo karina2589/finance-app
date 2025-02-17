@@ -43,6 +43,7 @@ class _CorePageState extends State<CorePage>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: true,
           centerTitle: true,
           title: Text(
             _currentIndex == 0? "Welcome to FM" : _currentIndex == 1? 'Savings': _currentIndex == 2? "Let's plan your budget": _currentIndex==3?'Finance review':"My Profile",

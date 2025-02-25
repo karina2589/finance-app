@@ -6,12 +6,14 @@ import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(MaterialApp(
-    home: FinancialReview(),
+    home: AnalyticsPage(),
     theme: AppTheme.lightTheme,
   ));
 }
 
-class FinancialReview extends StatelessWidget {
+class AnalyticsPage extends StatelessWidget {
+  const AnalyticsPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

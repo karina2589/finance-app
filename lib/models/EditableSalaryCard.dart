@@ -191,8 +191,8 @@ class SalaryCard extends StatelessWidget {
 }
 
 class CardData {
-  String workType;
-  String salary;
+  String cardName;
+  Map<String, double> incomes;
 
-  CardData({required this.workType, required this.salary});
+  CardData({required this.cardName, required this.incomes});
 }

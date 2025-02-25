@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_frontend/pages/BudgetPlanner.dart';
-import 'package:flutter_frontend/pages/FinancialReview.dart';
+import 'package:flutter_frontend/pages/AnalyticsPage.dart';
 import 'package:flutter_frontend/pages/Profile.dart';
 import 'package:flutter_frontend/pages/Savings.dart';
 
@@ -34,7 +34,7 @@ class _CorePageState extends State<CorePage>{
     MainPage(),
     Savings(),
     BudgetPlanner(),
-    FinancialReview(),
+    AnalyticsPage(),
     Profile()
   ];
 

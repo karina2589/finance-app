@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_frontend/models/AppTheme.dart';
-import 'package:flutter_frontend/requests/AuthProvider.dart';
 import 'package:flutter_frontend/requests/Authentication/StreamAuth.dart';
 import 'package:flutter_frontend/requests/Authentication/StreamAuthNotifier.dart';
 import 'package:flutter_frontend/requests/Authentication/StreamAuthScope.dart';

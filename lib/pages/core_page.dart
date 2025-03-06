@@ -49,7 +49,7 @@ class _CorePageState extends State<CorePage>{
             _currentIndex == 0? "Welcome to FM" : _currentIndex == 1? 'Savings': _currentIndex == 2? "Let's plan your budget": _currentIndex==3?'Finance review':"My Profile",
             style: Theme.of(context).textTheme.headlineLarge,
           ),
-          backgroundColor: AppTheme.mainBackColor,
+          backgroundColor: Colors.white,
           leading: IconButton(
             onPressed: () {},
             icon: Icon(

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_frontend/config/AppConfig.dart';
 import 'package:flutter_frontend/config/Frequency.dart';
 import 'package:flutter_frontend/config/IncomeCategories.dart';
+import 'package:flutter_frontend/jsonModels/BankCard.dart';
+import 'package:flutter_frontend/jsonModels/BankCards.dart';
 import 'package:flutter_frontend/jsonModels/Expense.dart';
 import 'package:flutter_frontend/config/ExpenseCategories.dart';
 import 'package:flutter_frontend/jsonModels/Expenses.dart';
@@ -9,10 +11,13 @@ import 'package:flutter_frontend/jsonModels/Incomes.dart';
 import 'package:flutter_frontend/jsonModels/Savings.dart';
 import 'package:flutter_frontend/models/AppTheme.dart';
 import 'package:flutter_frontend/models/CardSwiper.dart';
-import 'package:flutter_frontend/models/IncomeCardSwiper.dart';
+import 'package:flutter_frontend/models/BankCardSwiper.dart';
+import 'package:flutter_frontend/models/IncomesListTile.dart';
 import 'package:flutter_frontend/pages/draft.dart';
 import 'package:flutter_frontend/pages/surveyPages/surveyModels/ScrollableDate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../jsonModels/CardDetail.dart';
+import '../jsonModels/CardDetails.dart';
 import '../jsonModels/Income.dart';
 import '../jsonModels/Saving.dart';
 import 'package:intl/intl.dart';
@@ -41,25 +46,38 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
   TextEditingController savingDescriptionController = TextEditingController();
   TextEditingController savingTargetAmountController = TextEditingController();
   TextEditingController savingDueDate = TextEditingController();
-
-  //incomes controllers
-  TextEditingController incomeTitleController = TextEditingController();
-  TextEditingController incomeDescriptionController = TextEditingController();
-  TextEditingController incomeAmountController = TextEditingController();
+  //
+  // //incomes controllers
+  // TextEditingController incomeTitleController = TextEditingController();
+  // TextEditingController incomeDescriptionController = TextEditingController();
+  // TextEditingController incomeAmountController = TextEditingController();
 
   List<Expense>? expenses = [];
   List<Saving>? savings = [];
   List<Income>? incomes = [];
+  List<BankCard>? cards = [];
+  List<CardDetail>? cardDetails = [];
   bool isLoading = true;
+
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    // fetchIncomes();
     fetchExpenses();
     fetchSavings();
-    fetchIncomes();
+  }
+
+
+
+
+  Future<void> fetchCards() async{
+    List<BankCard>? cardsData = await BankCards.fetchCards();
+    if(mounted){
+      setState(() {
+        cards = cardsData;
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> fetchExpenses() async {
@@ -79,35 +97,6 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
       savings = data;
       isLoading = false;
     });
-  }
-
-  Future<void> fetchIncomes() async{
-    List<Income>? incomeData = await Incomes.fetchIncomes();
-    setState(() {
-      incomes = incomeData ?? [];
-      isLoading = false;
-    });
-  }
-
-  Future<void> updateIncome(Map<String, dynamic> updatedIncome, int id) async{
-    bool success = await Incomes.updateIncome(updatedIncome, id);
-    if(success){
-      fetchIncomes();
-    }
-  }
-
-  Future<void> addIncome(Map<String, dynamic> newIncome) async{
-    bool success = await Incomes.addNewIncome(newIncome);
-    if(success){
-      fetchIncomes();
-    }
-  }
-
-  Future<void> deleteIncome(int id) async{
-    bool success = await Incomes.deleteIncome(id);
-    if(success){
-      fetchIncomes();
-    }
   }
 
   Future<void> updateExpense(int id, Map<String, dynamic> updateExpense) async {
@@ -158,6 +147,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -165,40 +155,8 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           //  CardSwiper(),
-          IncomeCardSwiper(),
+          BankCardSwiper(),
 
-          Divider(
-            indent: 10,
-            endIndent: 10,
-          ),
-          Padding(
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Incomes",
-                    style: GoogleFonts.inriaSans(
-                        color: Colors.black, fontSize: 20),
-                  ),
-                  IconButton(
-                      onPressed: () => _showIncomesDialog(),
-                      //display dialog
-                      //update expenses list
-                      icon: Icon(Icons.add_circle_outline))
-                ],
-              )),
-          _displayListTile(
-              context,
-              "You don't have incomes yet. Click on the ",
-              " icon and add an income to your budget",
-              "No Planned Payments Yet",
-              Icons.payments_outlined,
-              incomes,
-              _incomesDisplay()),
-          SizedBox(
-            height: 20,
-          ),
 
           Divider(
             indent: 10,
@@ -211,7 +169,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                 children: [
                   Text(
                     "Planned expenses",
-                    style: GoogleFonts.inriaSans(
+                    style: GoogleFonts.poppins(
                         color: Colors.black, fontSize: 20),
                   ),
                   IconButton(
@@ -238,13 +196,13 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
             endIndent: 10,
           ),
           Padding(
-              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     "My Goals",
-                    style: GoogleFonts.inriaSans(
+                    style: GoogleFonts.poppins(
                         color: Colors.black, fontSize: 20),
                   ),
                   IconButton(
@@ -259,7 +217,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
               "No Saving Goals Yet",
               Icons.savings,
               savings,
-              _savingsDisplay()),
+              _savingsDisplayRounded()),
           SizedBox(
             height: 20,
           ),
@@ -345,21 +303,21 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
               ),
               title: Text(
                 "${expenses?[index].title}",
-                style: GoogleFonts.ubuntu(
+                style: GoogleFonts.poppins(
                     fontSize: 16,
                     color: Colors.black,
                     fontWeight: FontWeight.w400),
               ),
               subtitle: Text(
                 "${expenses?[index].category?.toLowerCase() ?? "not specified"}",
-                style: GoogleFonts.ubuntu(
+                style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Colors.grey,
                     fontWeight: FontWeight.w400),
               ),
               trailing: Text(
                   "${((expenses?[index].amount ?? 0.0))} / ${expenses?[index].frequency?.toLowerCase()}",
-                  style: GoogleFonts.ubuntu(
+                  style: GoogleFonts.poppins(
                       fontSize: 16,
                       color: Colors.black,
                       fontWeight: FontWeight.w400)),
@@ -369,56 +327,67 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
     );
   }
 
-  Widget _incomesDisplay() {
-    return ListView.builder(
+  Widget _savingsDisplayRounded() {
+    return GridView.builder(
+      physics: NeverScrollableScrollPhysics(), // Отключаем скролл внутри родителя
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: incomes?.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2, // Два элемента в строке
+        crossAxisSpacing: 5, // Расстояние между элементами по горизонтали
+        mainAxisSpacing: 10, // Расстояние между элементами по вертикали
+        childAspectRatio: 2, // Регулировка пропорций (ширина / высота)
+      ),
+      itemCount: savings?.length ?? 0,
       itemBuilder: (context, index) {
-
         return GestureDetector(
-            onTap: () => _showIncomesDialog(
-                income: incomes?[index], id: incomes?[index].id),
-            child: ListTile(
-              leading: Container(
-                width: 45, // Размер квадрата
-                height: 45,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100, // Белый фон
-                  borderRadius:
-                  BorderRadius.circular(8), // Можно сделать мягкие углы
-                ),
-                child: Icon(
-                  Icons.south_east_rounded,
-                  color: Colors.black, // Синий цвет иконки
-                  size: 24,
-                ),
-              ),
-              title: Text(
-                "${incomes?[index].title}",
-                style: GoogleFonts.ubuntu(
-                    fontSize: 16,
+          onTap: () => _showSavingsDialog(
+            saving: savings?[index], id: savings?[index].id,
+          ),
+          child: Container(
+            //height: 200,
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            margin: EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              //color: Colors.grey.shade50,
+              gradient: LinearGradient(colors: [
+                Colors.grey.shade100,
+                Colors.grey.shade200,
+                Colors.grey.shade300,
+               // Colors.grey.shade400
+
+              ]),
+
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.savings_outlined),
+                Text(
+                  "${savings?[index].title}",
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
                     color: Colors.black,
-                    fontWeight: FontWeight.w400),
-              ),
-              subtitle: Text(
-                "${incomes?[index].category?.toLowerCase() ?? "not specified"}",
-                style: GoogleFonts.ubuntu(
-                    fontSize: 14,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w400),
-              ),
-              trailing: Text(
-                  "${((incomes?[index].amount ?? 0.0))} / ${incomes?[index].frequency?.toLowerCase()}",
-                  style: GoogleFonts.ubuntu(
-                      fontSize: 16,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w400)),
-            ));
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                Text(
+                  "${savings?[index].targetAmount}",
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
       },
-      // ),
     );
   }
+
+
 
   Widget _savingsDisplay() {
     return ListView.builder(
@@ -449,21 +418,21 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
               ),
               title: Text(
                 "${savings?[index].title}",
-                style: GoogleFonts.ubuntu(
+                style: GoogleFonts.poppins(
                     fontSize: 16,
                     color: Colors.black,
                     fontWeight: FontWeight.w400),
               ),
               subtitle: Text(
                 "${savings?[index].description?.toLowerCase() ?? "category is not specified"}",
-                style: GoogleFonts.ubuntu(
+                style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Colors.grey,
                     fontWeight: FontWeight.w400),
               ),
               trailing: Text(
                   "${(savings?[index].savedAmount ?? 0)} / ${(savings?[index].targetAmount ?? 0)}",
-                  style: GoogleFonts.ubuntu(
+                  style: GoogleFonts.poppins(
                       fontSize: 16,
                       color: Colors.black,
                       fontWeight: FontWeight.w400)),
@@ -501,7 +470,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                 children: [
                   Text(
                     saving == null ? "Add Saving Goal" : "Edit Saving",
-                    style: GoogleFonts.ubuntu(
+                    style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
                         color: Colors.black),
@@ -601,7 +570,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
               children: [
                 Text(
                   expense == null ? "Add Expense" : "Edit Expense",
-                  style: GoogleFonts.ubuntu(
+                  style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                       color: Colors.black),
@@ -620,13 +589,13 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                     children: [
                       Text(
                         "Expense category",
-                        style: GoogleFonts.ubuntu(
+                        style: GoogleFonts.poppins(
                             color: Colors.black, fontSize: 17),
                       ),
                       DropdownButton<String>(
                         dropdownColor: Colors.white,
                         value: selectedCategory?.toLowerCase(),
-                        style: GoogleFonts.ubuntu(
+                        style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
                             color: Colors.black),
@@ -647,11 +616,11 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("Expense frequency",
-                          style: GoogleFonts.ubuntu(
+                          style: GoogleFonts.poppins(
                               color: Colors.black, fontSize: 17)),
                       DropdownButton<String>(
                         dropdownColor: Colors.white,
-                        style: GoogleFonts.ubuntu(
+                        style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
                             color: Colors.black),
@@ -718,152 +687,6 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
     );
   }
 
-  void _showIncomesDialog({Income? income, int? id}) {
-    // Если редактируем, заполняем поля текущими данными, иначе оставляем пустыми
-    incomeTitleController.text = income?.title ?? "";
-    incomeAmountController.text = income?.amount.toString() ?? "";
-    incomeDescriptionController.text = income?.description ?? "";
-    String? selectedCategory = income?.category;
-    String? selectedFrequency = income?.frequency;
-    //card id
-
-    showModalBottomSheet(
-      backgroundColor: Colors.white,
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(builder: (context, setState) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 16,
-              right: 16,
-              top: 16,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  income == null ? "Add income" : "Edit income",
-                  style: GoogleFonts.ubuntu(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black),
-                ),
-                SizedBox(height: 15),
-                _textField(incomeTitleController, "Title", TextInputType.text),
-                SizedBox(height: 10),
-                _textField(
-                    incomeAmountController, "Amount", TextInputType.number),
-                SizedBox(height: 10),
-                _textField(incomeDescriptionController, "Description",
-                    TextInputType.text),
-                SizedBox(height: 10),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Income category",
-                        style: GoogleFonts.ubuntu(
-                            color: Colors.black, fontSize: 17),
-                      ),
-                      DropdownButton<String>(
-                        dropdownColor: Colors.white,
-                        value: selectedCategory?.toLowerCase(),
-                        style: GoogleFonts.ubuntu(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black),
-                        items:
-                        IncomeCategories.incomeCategories.map((category) {
-                          return DropdownMenuItem(
-                              value: category.toLowerCase(),
-                              child: Text(category.toLowerCase()));
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedCategory = value!;
-                          });
-                        },
-                      ),
-                    ]),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Income frequency",
-                          style: GoogleFonts.ubuntu(
-                              color: Colors.black, fontSize: 17)),
-                      DropdownButton<String>(
-                        dropdownColor: Colors.white,
-                        style: GoogleFonts.ubuntu(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black),
-                        value: selectedFrequency?.toLowerCase(),
-                        items: Frequency.frequency.map((frequency) {
-                          return DropdownMenuItem(
-                              value: frequency.toLowerCase(),
-                              child: Text(frequency.toLowerCase()));
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedFrequency = value!;
-                          });
-                        },
-                      ),
-                    ]),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    if (income != null)
-                      ElevatedButton(
-                        onPressed: () {
-                          deleteIncome(income.id);
-                          //Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red),
-                        child: Text("Delete"),
-                      ),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (incomeTitleController.text.isNotEmpty &&
-                            incomeAmountController.text.isNotEmpty ) {
-                          Map<String, dynamic> newIncome = {
-                            "title": incomeTitleController.text,
-                            "amount":
-                            double.tryParse(incomeAmountController.text) ??
-                                0.0,
-                            "description": incomeDescriptionController.text,
-                            "frequency": selectedFrequency?.toUpperCase(),
-                            "category": selectedCategory?.toUpperCase(),
-                          };
-
-                          if (income == null) {
-                            addIncome(newIncome); // Добавление нового расхода
-                          } else {
-                           updateIncome(newIncome, income.id); // Обновление расхода
-                          }
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: Text(
-                          income == null ? "Add Income" : "Update Income"),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-              ],
-            ),
-          );
-        });
-      },
-    );
-  }
 
 
   Widget _textField(
@@ -876,7 +699,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
           textAlign: TextAlign.center,
           textAlignVertical: TextAlignVertical.center,
           controller: controller,
-          style: GoogleFonts.ubuntu(
+          style: GoogleFonts.poppins(
               fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black),
           decoration: InputDecoration(
               contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 12),
@@ -897,7 +720,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                 ),
               ),
               labelText: title,
-              labelStyle: GoogleFonts.ubuntu(
+              labelStyle: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                   color: Colors.grey))),
@@ -914,7 +737,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
             textAlign: TextAlign.center,
             textAlignVertical: TextAlignVertical.center,
             controller: controller,
-            style: GoogleFonts.ubuntu(
+            style: GoogleFonts.poppins(
                 fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black),
             readOnly: true,
             // Запрещаем ручной ввод
@@ -934,7 +757,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                 ),
               ),
               labelText: label,
-              labelStyle: GoogleFonts.ubuntu(
+              labelStyle: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                   color: Colors.grey),

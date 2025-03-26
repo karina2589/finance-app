@@ -3,6 +3,7 @@ import 'package:flutter_frontend/pages/BudgetPlanner.dart';
 import 'package:flutter_frontend/pages/AnalyticsPage.dart';
 import 'package:flutter_frontend/pages/Profile.dart';
 import 'package:flutter_frontend/pages/Savings.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../models/AppTheme.dart';
 import 'MainPage.dart';
@@ -73,6 +74,9 @@ class _CorePageState extends State<CorePage>{
       body: _pages[_currentIndex], // Отображение текущей страницы
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.transparent,
+        type: BottomNavigationBarType.fixed,
+        selectedLabelStyle:  GoogleFonts.ubuntu(fontSize: 10, color: Colors.grey.shade400, fontWeight: FontWeight.w400),
+        unselectedLabelStyle:  GoogleFonts.ubuntu(fontSize: 11, color: Colors.grey.shade600, fontWeight: FontWeight.w400),
         unselectedItemColor: AppTheme.primaryColor,
         selectedItemColor: AppTheme.iconsSecond,
         currentIndex: _currentIndex, // Выбранный пункт
@@ -88,11 +92,11 @@ class _CorePageState extends State<CorePage>{
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.attach_money),
-            label: 'Savings',
+            label: 'Activity',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.list_alt_outlined),
-            label: 'Budget Planner',
+            label: 'Budgeting',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.analytics),

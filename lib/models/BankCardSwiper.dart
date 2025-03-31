@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_frontend/bloc/income_bloc/income_bloc.dart';
+import 'package:flutter_frontend/bloc/income_bloc/income_event.dart';
+import 'package:flutter_frontend/bloc/income_bloc/income_state.dart';
 import 'package:flutter_frontend/jsonModels/BankCard.dart';
 import 'package:flutter_frontend/jsonModels/BankCards.dart';
 import 'package:flutter_frontend/jsonModels/CardDetail.dart';
@@ -38,7 +42,8 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    fetchIncomes();
+    context.read<IncomeBloc>().add(LoadIncomeEvent());
+   // fetchIncomes();
     fetchCards();
     fetchDetails();
   }
@@ -61,61 +66,25 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
     }
   }
 
-  Future<void> fetchIncomes() async {
-    List<Income>? incomeData = await Incomes.fetchIncomes();
-    setState(() {
-      incomes = incomeData ?? [];
-      isLoading = false;
-      fetchDetails();
-      fetchCards();
-    });
-  }
-
-  Future<void> updateIncome(Map<String, dynamic> updatedIncome, int id) async {
-    bool success = await Incomes.updateIncome(updatedIncome, id);
-    if (success) {
-      fetchIncomes();
-      fetchDetails();
-    }
-  }
-
-  Future<void> updateCard(String updatedCardName, int id) async{
+  Future<void> updateCard(String updatedCardName, int id) async {
     bool success = await BankCards.updateCard(updatedCardName, id);
-    if(success){
+    if (success) {
       fetchCards();
     }
   }
 
-
-  Future<void> addIncome(Map<String, dynamic> newIncome) async {
-    bool success = await Incomes.addNewIncome(newIncome);
-    if (success) {
-      fetchIncomes();
-      fetchDetails();
-    }
-  }
-
-  Future<void> addCard(String newCardName) async{
+  Future<void> addCard(String newCardName) async {
     bool success = await BankCards.addCard(newCardName);
-    if(success){
-      fetchCards();
-      fetchDetails();
-    }
-  }
-
-  Future<void> deleteIncome(int id) async {
-    bool success = await Incomes.deleteIncome(id);
     if (success) {
-      fetchIncomes();
+      fetchCards();
       fetchDetails();
     }
   }
-
-  Future<void> deleteCard(int id) async{
+  Future<void> deleteCard(int id) async {
     bool success = await BankCards.deleteCard(id);
-    if(success){
+    if (success) {
       fetchCards();
-      fetchIncomes();
+     // fetchIncomes();
       fetchDetails();
     }
   }
@@ -149,7 +118,8 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
 
             final card = cards?[index];
             // final cardDetail = cardDetails?[index];
-            final cardDetail = (cardDetails != null && index < cardDetails!.length)
+            final cardDetail = (cardDetails != null &&
+                index < cardDetails!.length)
                 ? cardDetails![index]
                 : null;
             return _buildIncomeCard(card, cardDetail);
@@ -182,9 +152,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
           "You don't have incomes yet. Click on the ",
           " icon and add an income to your budget",
           "No Planned Payments Yet",
-          Icons.payments_outlined,
-          incomes,
-          _incomesDisplay()),
+          Icons.payments_outlined),
       SizedBox(
         height: 20,
       ),
@@ -194,63 +162,65 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
   /// Создает карточку дохода
   Widget _buildIncomeCard(BankCard? card, CardDetail? detail) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      child: GestureDetector(
-        onTap:()=> _showCardDialog(card: card, id: card?.id),
-        child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 4,
-        color: Colors.blueAccent,
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade400, Colors.blue.shade700],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    // colors: [Colors.white60, Colors.white70, Colors.white],
-                    colors: [
-                      Colors.blue.shade300,
-                      Colors.blue.shade400,
-                      Colors.blue.shade500
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  textAlign: TextAlign.start,
-                  "${card?.title ?? ""}",
-                  style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500),
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        child: GestureDetector(
+          onTap: () => _showCardDialog(card: card, id: card?.id),
+          child: Card(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15)),
+            elevation: 4,
+            color: Colors.blueAccent,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade400, Colors.blue.shade700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
               ),
-              SizedBox(height: 10,),
-              Text(("Total balance"),
-                  style:
-                  GoogleFonts.poppins(fontSize: 13, color: Colors.white70)),
-              Text("\$ ${detail?.balance ?? 0}",
-                  style: GoogleFonts.poppins(fontSize: 18, color: Colors.white)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        // colors: [Colors.white60, Colors.white70, Colors.white],
+                        colors: [
+                          Colors.blue.shade300,
+                          Colors.blue.shade400,
+                          Colors.blue.shade500
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      textAlign: TextAlign.start,
+                      "${card?.title ?? ""}",
+                      style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  SizedBox(height: 10,),
+                  Text(("Total balance"),
+                      style:
+                      GoogleFonts.poppins(fontSize: 13, color: Colors.white70)),
+                  Text("\$ ${detail?.balance ?? 0}",
+                      style: GoogleFonts.poppins(
+                          fontSize: 18, color: Colors.white)),
 
-            ],
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-      )
+        )
     );
   }
 
@@ -268,7 +238,10 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
         return StatefulBuilder(builder: (context, setState) {
           return Padding(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
+              bottom: MediaQuery
+                  .of(context)
+                  .viewInsets
+                  .bottom,
               left: 16,
               right: 16,
               top: 16,
@@ -295,7 +268,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                       ElevatedButton(
                         onPressed: () {
                           deleteCard(card.id);
-                          //Navigator.pop(context);
+                          Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red),
@@ -303,7 +276,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                       ),
                     ElevatedButton(
                       onPressed: () {
-                        if (cardNameController.text.isNotEmpty ) {
+                        if (cardNameController.text.isNotEmpty) {
                           String newCard = cardNameController.text;
 
                           if (card == null) {
@@ -332,10 +305,10 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       child: GestureDetector(
-        onTap: ()=> _showCardDialog(),
+        onTap: () => _showCardDialog(),
         child: Card(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           elevation: 4,
           color: Colors.white,
           child: Container(
@@ -353,62 +326,82 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
     );
   }
 
-  Widget _displayListTile(
-      BuildContext context,
+  Widget _displayListTile(BuildContext context,
       String noInfoYet1,
       String noInfoYet2,
       String noInfoTitle,
       IconData icon,
-      List<dynamic>? list,
-      Widget displayFunction) {
-    if (isLoading) {
-      return Center(child: CircularProgressIndicator());
-    } else if (list == null || list.isEmpty) {
-      // Если список пуст, показываем сообщение
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 50, color: Colors.grey),
-            SizedBox(height: 10),
-            Text( (noInfoYet1),
-              style: GoogleFonts.inder(fontSize: 18, color: Colors.black54),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: GoogleFonts.inder(fontSize: 16, color: Colors.black54),
-                  children: [
-                    TextSpan(text: noInfoYet1),
-                    WidgetSpan(
-                      child: Icon(Icons.add_circle_outline,
-                          size: 20, color: Colors.black54),
+      ) {
+    return BlocListener<IncomeBloc, IncomeState>(
+        listener: (context, state) {
+      print("State changed: $state");
+      if (state is IncomeLoadedState) {
+        setState(() {});  // Принудительное обновление UI
+      }
+    },
+    child: BlocBuilder<IncomeBloc, IncomeState>(
+        builder: (context, state) {
+          print("UI updated with state: $state");
+          if (state is IncomeLoadingState) {
+            return Center(child: CircularProgressIndicator());
+          } else if (state is IncomeEmptyState) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 50, color: Colors.grey),
+                  SizedBox(height: 10),
+                  Text((noInfoYet1),
+                    style: GoogleFonts.inder(
+                        fontSize: 18, color: Colors.black54),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: GoogleFonts.inder(
+                            fontSize: 16, color: Colors.black54),
+                        children: [
+                          TextSpan(text: noInfoYet1),
+                          WidgetSpan(
+                            child: Icon(Icons.add_circle_outline,
+                                size: 20, color: Colors.black54),
+                          ),
+                          TextSpan(text: noInfoYet2),
+                        ],
+                      ),
                     ),
-                    TextSpan(text: noInfoYet2),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-      );
-    }
+            );
+          }
 
-    return displayFunction;
+          else if(state is IncomeLoadedState){
+            print("Rendering UI with incomes: ${state.incomes}");
+            return _incomesDisplay(state.incomes);
+          }
+          else{
+            return Text("error");
+          }
+        }
+    )
+    );
   }
 
-  Widget _incomesDisplay() {
-    return ListView.builder(
+
+
+Widget _incomesDisplay(List<Income>? incomes) {
+  return ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       itemCount: incomes?.length,
       itemBuilder: (context, index) {
-
         return GestureDetector(
-            onTap: () => _showIncomesDialog(
-                income: incomes?[index], id: incomes?[index].id),
+            onTap: () =>
+                _showIncomesDialog(
+                    income: incomes?[index], id: incomes?[index].id),
             child: ListTile(
               leading: Container(
                 width: 45, // Размер квадрата
@@ -439,19 +432,23 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                     fontWeight: FontWeight.w400),
               ),
               trailing: Text(
-                  "${((incomes?[index].amount ?? 0.0))} / ${incomes?[index].frequency?.toLowerCase()}",
+                  "${((incomes?[index].amount ?? 0.0))} / ${incomes?[index]
+                      .frequency?.toLowerCase()}",
                   style: GoogleFonts.poppins(
                       fontSize: 16,
                       color: Colors.black,
                       fontWeight: FontWeight.w400)),
-            ));
-      },
-      // ),
-    );
-  }
+            )
+        );
+      }
+        );
+      }
 
 
-  void _showIncomesDialog({Income? income, int? id}) {
+
+
+      void _showIncomesDialog({Income? income, int? id})
+  {
     // Если редактируем, заполняем поля текущими данными, иначе оставляем пустыми
     incomeTitleController.text = income?.title ?? "";
     incomeAmountController.text = income?.amount.toString() ?? "";
@@ -460,7 +457,9 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
     String? selectedFrequency = income?.frequency;
 
     // Сопоставление карт (ID -> Название)
-    Map<int, String> cardWithNames = {for (var card in cards ?? []) card.id: card.title};
+    Map<int, String> cardWithNames = {
+      for (var card in cards ?? []) card.id: card.title
+    };
 
     // Список названий карт
     List<String>? cardsName = cards?.map((card) => card.title).toList();
@@ -481,7 +480,10 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
         return StatefulBuilder(builder: (context, setState) {
           return Padding(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
+              bottom: MediaQuery
+                  .of(context)
+                  .viewInsets
+                  .bottom,
               left: 16,
               right: 16,
               top: 16,
@@ -571,7 +573,9 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
                             color: Colors.black),
-                        value: selectedCardId != null? cardWithNames[selectedCardId]: null,
+                        value: selectedCardId != null
+                            ? cardWithNames[selectedCardId]
+                            : null,
                         items: cardsName?.map((card) {
                           return DropdownMenuItem(
                               value: card,
@@ -593,7 +597,8 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                     if (income != null)
                       ElevatedButton(
                         onPressed: () {
-                          deleteIncome(income.id);
+                          context.read<IncomeBloc>().add(DeleteIncomeEvent(incomeId: income.id));
+                         // deleteIncome(income.id);
                           //Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
@@ -603,7 +608,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                     ElevatedButton(
                       onPressed: () {
                         if (incomeTitleController.text.isNotEmpty &&
-                            incomeAmountController.text.isNotEmpty ) {
+                            incomeAmountController.text.isNotEmpty) {
                           Map<String, dynamic> newIncome = {
                             "title": incomeTitleController.text,
                             "amount":
@@ -616,9 +621,12 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                           };
 
                           if (income == null) {
-                            addIncome(newIncome); // Добавление нового расхода
+                            context.read<IncomeBloc>().add(AddIncomeEvent(newIncome: newIncome));
+                            //addIncome(newIncome); // Добавление нового расхода
                           } else {
-                            updateIncome(newIncome, income.id); // Обновление расхода
+                            context.read<IncomeBloc>().add(UpdateIncomeEvent(incomeId: income.id, updatedIncome: newIncome));
+                            // updateIncome(
+                            //     newIncome, income.id); // Обновление расхода
                           }
                           Navigator.pop(context);
                         }
@@ -638,10 +646,13 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
   }
 
 
-  Widget _textField(
-      TextEditingController controller, String title, TextInputType type) {
+  Widget _textField(TextEditingController controller, String title,
+      TextInputType type) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.85,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width * 0.85,
       height: 38,
       child: TextField(
           keyboardType: type,

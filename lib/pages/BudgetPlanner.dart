@@ -1,33 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/config/AppConfig.dart';
-import 'package:flutter_frontend/config/Frequency.dart';
-import 'package:flutter_frontend/config/IncomeCategories.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_frontend/bloc/expenses_bloc/expense_bloc.dart';
+import 'package:flutter_frontend/bloc/expenses_bloc/expense_event.dart';
+import 'package:flutter_frontend/bloc/expenses_bloc/expense_state.dart';
+import 'package:flutter_frontend/bloc/income_bloc/income_bloc.dart';
+import 'package:flutter_frontend/bloc/savings_bloc/savings_bloc.dart';
+import 'package:flutter_frontend/bloc/savings_bloc/savings_event.dart';
+import 'package:flutter_frontend/bloc/savings_bloc/savings_state.dart';
 import 'package:flutter_frontend/jsonModels/BankCard.dart';
 import 'package:flutter_frontend/jsonModels/BankCards.dart';
 import 'package:flutter_frontend/jsonModels/Expense.dart';
 import 'package:flutter_frontend/config/ExpenseCategories.dart';
-import 'package:flutter_frontend/jsonModels/Expenses.dart';
-import 'package:flutter_frontend/jsonModels/Incomes.dart';
 import 'package:flutter_frontend/jsonModels/Savings.dart';
 import 'package:flutter_frontend/models/AppTheme.dart';
-import 'package:flutter_frontend/models/CardSwiper.dart';
 import 'package:flutter_frontend/models/BankCardSwiper.dart';
-import 'package:flutter_frontend/models/IncomesListTile.dart';
-import 'package:flutter_frontend/pages/draft.dart';
-import 'package:flutter_frontend/pages/surveyPages/surveyModels/ScrollableDate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../jsonModels/CardDetail.dart';
-import '../jsonModels/CardDetails.dart';
 import '../jsonModels/Income.dart';
 import '../jsonModels/Saving.dart';
-import 'package:intl/intl.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); // Добавь эту строку
-  runApp(MaterialApp(
-    home: Scaffold(body: BudgetPlanner()),
-    theme: AppTheme.lightTheme,
-  ));
+  runApp(
+    MultiBlocProvider(
+        providers: [
+          BlocProvider<IncomeBloc>(create: (context) => IncomeBloc()),
+          BlocProvider<ExpenseBloc>(create: (context) => ExpenseBloc()),
+          BlocProvider<SavingBloc>(create: (context) => SavingBloc()),
+        ],
+        child: MaterialApp(
+          home: Scaffold(body: BudgetPlanner()),
+          theme: AppTheme.lightTheme,
+        )),
+  );
 }
 
 class BudgetPlanner extends StatefulWidget {
@@ -46,107 +51,63 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
   TextEditingController savingDescriptionController = TextEditingController();
   TextEditingController savingTargetAmountController = TextEditingController();
   TextEditingController savingDueDate = TextEditingController();
-  //
-  // //incomes controllers
-  // TextEditingController incomeTitleController = TextEditingController();
-  // TextEditingController incomeDescriptionController = TextEditingController();
-  // TextEditingController incomeAmountController = TextEditingController();
 
-  List<Expense>? expenses = [];
-  List<Saving>? savings = [];
-  List<Income>? incomes = [];
+ // List<Expense>? expenses = [];
+  //List<Saving>? savings = [];
+  // List<Income>? incomes = [];
   List<BankCard>? cards = [];
   List<CardDetail>? cardDetails = [];
   bool isLoading = true;
 
-
   @override
   void initState() {
     super.initState();
-    fetchExpenses();
-    fetchSavings();
+    context.read<ExpenseBloc>().add(LoadExpenseEvent());
+    context.read<SavingBloc>().add(LoadSavingsEvent());
   }
 
-
-
-
-  Future<void> fetchCards() async{
+  Future<void> fetchCards() async {
     List<BankCard>? cardsData = await BankCards.fetchCards();
-    if(mounted){
+    if (mounted) {
       setState(() {
         cards = cardsData;
         isLoading = false;
       });
     }
   }
-
-  Future<void> fetchExpenses() async {
-    List<Expense>? expenseData = await Expenses.fetchExpenses();
-    if (mounted) {
-      setState(() {
-        expenses = expenseData;
-        isLoading = false;
-      });
-    }
-    print(expenses);
-  }
-
-  Future<void> fetchSavings() async {
-    List<Saving>? data = await Savings.fetchSavings();
-    setState(() {
-      savings = data;
-      isLoading = false;
-    });
-  }
-
-  Future<void> updateExpense(int id, Map<String, dynamic> updateExpense) async {
-    bool success = await Expenses.updateExpense(id, updateExpense);
-    if (success) {
-      fetchExpenses();
-    }
-  }
-
-  Future<void> updateSaving(Map<String, dynamic> updateExpense, int id) async {
-    bool success = await Savings.updateSaving(updateExpense, id);
-    if (success) {
-      fetchSavings();
-    }
-  }
-
-  Future<void> addExpense(Map<String, dynamic> newExpense) async {
-    bool success = await Expenses.addExpense(newExpense);
-    if (success) {
-      fetchExpenses();
-    }
-  }
-
-  Future<void> addSaving(Map<String, dynamic> newSaving) async {
-    bool success = await Savings.addSavings(newSaving);
-    if (success) {
-      fetchSavings();
-    }
-    savingDueDate.clear();
-    savingDescriptionController.clear();
-    savingTargetAmountController.clear();
-    savingTitleController.clear();
-  }
-
-  Future<void> deleteExpense(int id) async {
-    bool success = await Expenses.deleteExpense(id);
-    if (success) {
-      fetchExpenses();
-      Navigator.pop(context);
-    }
-  }
-
-  Future<void> deleteSaving(int id) async {
-    bool success = await Savings.deleteSaving(id);
-    if (success) {
-      fetchSavings();
-      Navigator.pop(context);
-    }
-  }
-
+  // Future<void> fetchSavings() async {
+  //   List<Saving>? data = await Savings.fetchSavings();
+  //   setState(() {
+  //     savings = data;
+  //     isLoading = false;
+  //   });
+  // }
+  //
+  // Future<void> updateSaving(Map<String, dynamic> updateExpense, int id) async {
+  //   bool success = await Savings.updateSaving(updateExpense, id);
+  //   if (success) {
+  //     fetchSavings();
+  //   }
+  // }
+  //
+  // Future<void> addSaving(Map<String, dynamic> newSaving) async {
+  //   bool success = await Savings.addSavings(newSaving);
+  //   if (success) {
+  //     fetchSavings();
+  //   }
+  //   savingDueDate.clear();
+  //   savingDescriptionController.clear();
+  //   savingTargetAmountController.clear();
+  //   savingTitleController.clear();
+  // }
+  //
+  // Future<void> deleteSaving(int id) async {
+  //   bool success = await Savings.deleteSaving(id);
+  //   if (success) {
+  //     fetchSavings();
+  //     Navigator.pop(context);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +117,6 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
         children: [
           //  CardSwiper(),
           BankCardSwiper(),
-
 
           Divider(
             indent: 10,
@@ -169,8 +129,8 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                 children: [
                   Text(
                     "Planned expenses",
-                    style: GoogleFonts.poppins(
-                        color: Colors.black, fontSize: 20),
+                    style:
+                        GoogleFonts.poppins(color: Colors.black, fontSize: 20),
                   ),
                   IconButton(
                       onPressed: () => _showExpenseDialog(),
@@ -179,14 +139,13 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                       icon: Icon(Icons.add_circle_outline))
                 ],
               )),
-          _displayListTile(
+          _expenseBlocDisplay(
               context,
               "You have not budgeted your expenses yet. Click on the ",
               " icon and add an expense to your budget",
               "No Planned Payments Yet",
               Icons.payments_outlined,
-              expenses,
-              _expenseDisplay()),
+             ),
           SizedBox(
             height: 20,
           ),
@@ -202,22 +161,21 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                 children: [
                   Text(
                     "My Goals",
-                    style: GoogleFonts.poppins(
-                        color: Colors.black, fontSize: 20),
+                    style:
+                        GoogleFonts.poppins(color: Colors.black, fontSize: 20),
                   ),
                   IconButton(
                       onPressed: () => _showSavingsDialog(),
                       icon: Icon(Icons.add_circle_outline))
                 ],
               )),
-          _displayListTile(
+          _savingBlocDisplay(
               context,
               "You don't have any savings goal. Click on the ",
               " icon to add new saving goal",
               "No Saving Goals Yet",
-              Icons.savings,
-              savings,
-              _savingsDisplayRounded()),
+              Icons.savings
+             ),
           SizedBox(
             height: 20,
           ),
@@ -226,6 +184,127 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
     );
   }
 
+  Widget _expenseBlocDisplay(
+      BuildContext context,
+      String noInfoYet1,
+      String noInfoYet2,
+      String noInfoTitle,
+      IconData icon,
+      ) {
+    return BlocListener<ExpenseBloc, ExpenseState>(
+        listener: (context, state){
+          print("Expense state changed: $state");
+          if(state is ExpenseLoadedState){
+            setState(() {});
+          }
+        },
+      child: BlocBuilder<ExpenseBloc, ExpenseState>(
+          builder: (context, state){
+            if(state is ExpenseLoadingState){
+              return Center(child: CircularProgressIndicator());
+            }else if(state is ExpenseLoadedState){
+              return _expenseDisplay(state.expenses);
+            }else if(state is ExpenseEmptyState){
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 50, color: Colors.grey),
+                    SizedBox(height: 10),
+                    Text(
+                      "No expenses yet",
+                      style: GoogleFonts.inder(fontSize: 18, color: Colors.black54),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: GoogleFonts.inder(fontSize: 16, color: Colors.black54),
+                          children: [
+                            TextSpan(text: noInfoYet1),
+                            WidgetSpan(
+                              child: Icon(Icons.add_circle_outline,
+                                  size: 20, color: Colors.black54),
+                            ),
+                            TextSpan(text: noInfoYet2),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }else{
+              return Text("Expense error");
+            }
+          }
+      ),
+    );
+
+
+  }
+
+  Widget _savingBlocDisplay(
+      BuildContext context,
+      String noInfoYet1,
+      String noInfoYet2,
+      String noInfoTitle,
+      IconData icon,
+      ) {
+    return BlocListener<SavingBloc, SavingState>(
+      listener: (context, state){
+        print("Expense state changed: $state");
+        if(state is SavingsLoadedState){
+          setState(() {});
+        }
+      },
+      child: BlocBuilder<SavingBloc, SavingState>(
+          builder: (context, state){
+            if(state is SavingsLoadingState){
+              return Center(child: CircularProgressIndicator());
+            }else if(state is SavingsLoadedState){
+              return _savingsDisplayRounded(state.savings);
+            }else if(state is SavingEmptyState){
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 50, color: Colors.grey),
+                    SizedBox(height: 10),
+                    Text(
+                      "No savings yet",
+                      style: GoogleFonts.inder(fontSize: 18, color: Colors.black54),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: GoogleFonts.inder(fontSize: 16, color: Colors.black54),
+                          children: [
+                            TextSpan(text: noInfoYet1),
+                            WidgetSpan(
+                              child: Icon(Icons.add_circle_outline,
+                                  size: 20, color: Colors.black54),
+                            ),
+                            TextSpan(text: noInfoYet2),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }else{
+              return Text("Savings error");
+            }
+          }
+      ),
+    );
+
+
+  }
   Widget _displayListTile(
       BuildContext context,
       String noInfoYet1,
@@ -233,11 +312,11 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
       String noInfoTitle,
       IconData icon,
       List<dynamic>? list,
-      Widget displayFunction) {
+      Widget displayFunction
+      ) {
     if (isLoading) {
       return Center(child: CircularProgressIndicator());
     } else if (list == null || list.isEmpty) {
-      // Если список пуст, показываем сообщение
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -273,7 +352,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
     return displayFunction;
   }
 
-  Widget _expenseDisplay() {
+  Widget _expenseDisplay(List<Expense>? expenses) {
     return ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
@@ -327,21 +406,23 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
     );
   }
 
-  Widget _savingsDisplayRounded() {
+  Widget _savingsDisplayRounded(List<Saving>? savings) {
     return GridView.builder(
-      physics: NeverScrollableScrollPhysics(), // Отключаем скролл внутри родителя
+      physics: NeverScrollableScrollPhysics(),
+      // Отключаем скролл внутри родителя
       shrinkWrap: true,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // Два элемента в строке
-        crossAxisSpacing: 5, // Расстояние между элементами по горизонтали
-        mainAxisSpacing: 10, // Расстояние между элементами по вертикали
-        childAspectRatio: 2, // Регулировка пропорций (ширина / высота)
+        crossAxisCount: 2,
+        crossAxisSpacing: 5,
+        mainAxisSpacing: 10,
+        childAspectRatio: 2,
       ),
       itemCount: savings?.length ?? 0,
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () => _showSavingsDialog(
-            saving: savings?[index], id: savings?[index].id,
+            saving: savings?[index],
+            id: savings?[index].id,
           ),
           child: Container(
             //height: 200,
@@ -354,10 +435,8 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                 Colors.grey.shade100,
                 Colors.grey.shade200,
                 Colors.grey.shade300,
-               // Colors.grey.shade400
-
+                // Colors.grey.shade400
               ]),
-
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -384,61 +463,6 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
           ),
         );
       },
-    );
-  }
-
-
-
-  Widget _savingsDisplay() {
-    return ListView.builder(
-      physics: NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: savings?.length,
-      itemBuilder: (context, index) {
-        Map<String, IconData> expenseIcons = ExpenseCategories.expenseIcons;
-        // IconData? iconToChoose = expenseIcons[savings?[index].?.toLowerCase().trim()];
-
-        return GestureDetector(
-            onTap: () => _showSavingsDialog(
-                saving: savings?[index], id: savings?[index].id),
-            child: ListTile(
-              leading: Container(
-                width: 40, // Размер квадрата
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100, // Белый фон
-                  borderRadius:
-                      BorderRadius.circular(8), // Можно сделать мягкие углы
-                ),
-                child: Icon(
-                  Icons.trending_up,
-                  color: Colors.black, // Синий цвет иконки
-                  size: 24,
-                ),
-              ),
-              title: Text(
-                "${savings?[index].title}",
-                style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w400),
-              ),
-              subtitle: Text(
-                "${savings?[index].description?.toLowerCase() ?? "category is not specified"}",
-                style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w400),
-              ),
-              trailing: Text(
-                  "${(savings?[index].savedAmount ?? 0)} / ${(savings?[index].targetAmount ?? 0)}",
-                  style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w400)),
-            ));
-      },
-      // ),
     );
   }
 
@@ -493,7 +517,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                       if (saving != null)
                         ElevatedButton(
                           onPressed: () {
-                            deleteSaving(saving.id);
+                            context.read<SavingBloc>().add(DeleteSavingEvent(savingId: saving.id));
                             //Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(
@@ -501,34 +525,39 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                           child: Text("Delete"),
                         ),
                       ElevatedButton(
-                        onPressed: () async {
+                        onPressed: () {
                           print("Button pressed");
                           if (savingTitleController.text.isNotEmpty &&
-                              savingDescriptionController.text.isNotEmpty &&
+                              //savingDescriptionController.text.isNotEmpty &&
                               savingTargetAmountController.text.isNotEmpty) {
                             Map<String, dynamic> newSaving = {
                               "title": savingTitleController.text,
                               "targetAmount": double.tryParse(
-                                  savingTargetAmountController.text.replaceAll(',', '.')) ??
+                                      savingTargetAmountController.text
+                                          .replaceAll(',', '.')) ??
                                   0.0,
                               "description": savingDescriptionController.text,
-                              "dueDate": DateTime.parse(savingDueDate.text).toUtc().toIso8601String(),
+                              "dueDate": DateTime.parse(savingDueDate.text)
+                                  .toUtc()
+                                  .toIso8601String(),
                             };
 
                             print("Saving data: $newSaving");
 
                             if (saving == null) {
-                              await addSaving(newSaving);
+                              context.read<SavingBloc>().add(AddSavingEvent(newSaving: newSaving));
+
                               print("Saving added successfully!");
                             } else {
-                              await updateSaving(newSaving, saving.id);
+                              context.read<SavingBloc>().add(UpdateSavingsEvent(savingId: saving.id, updatedSaving: newSaving));
                               print("Updating saving...");
                             }
 
-                            if (context.mounted) Navigator.pop(context);
+                            Navigator.pop(context);
                           }
                         },
-                        child: Text(saving == null ? "Add Saving" : "Update Saving"),
+                        child: Text(
+                            saving == null ? "Add Saving" : "Update Saving"),
                       ),
                     ],
                   ),
@@ -643,7 +672,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                     if (expense != null)
                       ElevatedButton(
                         onPressed: () {
-                          deleteExpense(expense.id);
+                          context.read<ExpenseBloc>().add(DeleteExpenseEvent(expenseId: expense.id));
                           //Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
@@ -653,7 +682,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                     ElevatedButton(
                       onPressed: () {
                         if (expenseTitleController.text.isNotEmpty &&
-                            expenseAmountController.text.isNotEmpty ) {
+                            expenseAmountController.text.isNotEmpty) {
                           Map<String, dynamic> newExpense = {
                             "title": expenseTitleController.text,
                             "amount":
@@ -665,10 +694,9 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                           };
 
                           if (expense == null) {
-                             addExpense(newExpense); // Добавление нового расхода
+                            context.read<ExpenseBloc>().add(AddExpenseEvent(newExpense: newExpense));
                           } else {
-                            updateExpense(
-                                expense.id, newExpense); // Обновление расхода
+                            context.read<ExpenseBloc>().add(UpdateExpenseEvent(expenseId: expense.id, updatedExpense: newExpense));
                           }
                           Navigator.pop(context);
                         }
@@ -686,8 +714,6 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
       },
     );
   }
-
-
 
   Widget _textField(
       TextEditingController controller, String title, TextInputType type) {
@@ -730,55 +756,52 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
   Widget _datePicker(
       BuildContext context, String label, TextEditingController controller) {
     return SizedBox(
-        width: MediaQuery.of(context).size.width * 0.85,
-        height: 40,
-
-          child: TextField(
-            textAlign: TextAlign.center,
-            textAlignVertical: TextAlignVertical.center,
-            controller: controller,
-            style: GoogleFonts.poppins(
-                fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black),
-            readOnly: true,
-            // Запрещаем ручной ввод
-            decoration: InputDecoration(
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(25)),
-                borderSide: BorderSide(
-                  width: 1,
-                  color: Colors.grey.shade500,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(25)),
-                borderSide: BorderSide(
-                  width: 1,
-                  color: Colors.grey.shade700,
-                ),
-              ),
-              labelText: label,
-              labelStyle: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.grey),
-              suffixIcon: Icon(Icons.calendar_today, color: Colors.black),
-              border: OutlineInputBorder(),
+      width: MediaQuery.of(context).size.width * 0.85,
+      height: 40,
+      child: TextField(
+        textAlign: TextAlign.center,
+        textAlignVertical: TextAlignVertical.center,
+        controller: controller,
+        style: GoogleFonts.poppins(
+            fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black),
+        readOnly: true,
+        // Запрещаем ручной ввод
+        decoration: InputDecoration(
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(25)),
+            borderSide: BorderSide(
+              width: 1,
+              color: Colors.grey.shade500,
             ),
-            onTap: () async {
-              DateTime? pickedDate = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-              );
-
-              if (pickedDate != null) {
-                // Форматируем дату в "YYYY-MM-DD"
-                controller.text =
-                    "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-              }
-            },
           ),
-        );
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(25)),
+            borderSide: BorderSide(
+              width: 1,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          labelText: label,
+          labelStyle: GoogleFonts.poppins(
+              fontSize: 16, fontWeight: FontWeight.w400, color: Colors.grey),
+          suffixIcon: Icon(Icons.calendar_today, color: Colors.black),
+          border: OutlineInputBorder(),
+        ),
+        onTap: () async {
+          DateTime? pickedDate = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2100),
+          );
+
+          if (pickedDate != null) {
+            // Форматируем дату в "YYYY-MM-DD"
+            controller.text =
+                "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+          }
+        },
+      ),
+    );
   }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_frontend/bloc/cards_bloc/cards_bloc.dart';
+import 'package:flutter_frontend/bloc/cards_bloc/cards_event.dart';
+import 'package:flutter_frontend/bloc/cards_bloc/cards_state.dart';
 import 'package:flutter_frontend/bloc/income_bloc/income_bloc.dart';
 import 'package:flutter_frontend/bloc/income_bloc/income_event.dart';
 import 'package:flutter_frontend/bloc/income_bloc/income_state.dart';
@@ -43,50 +46,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
     // TODO: implement initState
     super.initState();
     context.read<IncomeBloc>().add(LoadIncomeEvent());
-   // fetchIncomes();
-    fetchCards();
-    fetchDetails();
-  }
-
-  Future<void> fetchDetails() async {
-    List<CardDetail>? detailData = await CardDetails.fetchCardsDetails();
-    setState(() {
-      cardDetails = detailData ?? [];
-      isLoading = false;
-    });
-  }
-
-  Future<void> fetchCards() async {
-    List<BankCard>? cardsData = await BankCards.fetchCards();
-    if (mounted) {
-      setState(() {
-        cards = cardsData;
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> updateCard(String updatedCardName, int id) async {
-    bool success = await BankCards.updateCard(updatedCardName, id);
-    if (success) {
-      fetchCards();
-    }
-  }
-
-  Future<void> addCard(String newCardName) async {
-    bool success = await BankCards.addCard(newCardName);
-    if (success) {
-      fetchCards();
-      fetchDetails();
-    }
-  }
-  Future<void> deleteCard(int id) async {
-    bool success = await BankCards.deleteCard(id);
-    if (success) {
-      fetchCards();
-     // fetchIncomes();
-      fetchDetails();
-    }
+    context.read<CardBloc>().add(LoadCardEvent());
   }
 
   //
@@ -106,25 +66,35 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
     return Column(children: [
       SizedBox(
         height: 180,
-        child: PageView.builder(
-          padEnds: false,
-          controller: _pageController,
-          itemCount: (cards?.length ?? 0) + 1,
-          itemBuilder: (context, index) {
-            if (cards == null || index >= cards!.length) {
-              // Последний индекс для кнопки добавления
-              return _buildAddButton();
-            }
+        child: BlocBuilder<CardBloc, CardState>(builder: (context, state){
+          if(state is CardLoadingState){
+            return Center(child: CircularProgressIndicator(),);
+          }
+          else if(state is CardLoadedState){
+            final List<BankCard>? cards = state.cards;
+            return PageView.builder(
+              padEnds: false,
+              controller: _pageController,
+              itemCount: (cards?.length ?? 0) + 1,
+              itemBuilder: (context, index) {
+                if (cards == null || index >= cards.length) {
+                  // Последний индекс для кнопки добавления
+                  return _buildAddButton();
+                }
 
-            final card = cards?[index];
-            // final cardDetail = cardDetails?[index];
-            final cardDetail = (cardDetails != null &&
-                index < cardDetails!.length)
-                ? cardDetails![index]
-                : null;
-            return _buildIncomeCard(card, cardDetail);
-          },
-        ),
+                final card = cards[index];
+                // final cardDetail = cardDetails?[index];
+                // final cardDetail = (cardDetails != null &&
+                //     index < cardDetails!.length)
+                //     ? cardDetails![index]
+                //     : null;
+                return _buildIncomeCard(card);
+              },
+            );
+          }else{
+            return Text("Cards loading error. Please check your connection");
+          }
+        })
       ),
       Divider(
         indent: 10,
@@ -160,7 +130,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
   }
 
   /// Создает карточку дохода
-  Widget _buildIncomeCard(BankCard? card, CardDetail? detail) {
+  Widget _buildIncomeCard(BankCard? card) {
     return Padding(
         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: GestureDetector(
@@ -212,7 +182,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                   Text(("Total balance"),
                       style:
                       GoogleFonts.poppins(fontSize: 13, color: Colors.white70)),
-                  Text("\$ ${detail?.balance ?? 0}",
+                  Text("\$ ${card?.balance ?? 0}",
                       style: GoogleFonts.poppins(
                           fontSize: 18, color: Colors.white)),
 
@@ -267,7 +237,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                     if (card != null)
                       ElevatedButton(
                         onPressed: () {
-                          deleteCard(card.id);
+                          context.read<CardBloc>().add(DeleteCardEvent(cardId: card.id));
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
@@ -280,9 +250,9 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                           String newCard = cardNameController.text;
 
                           if (card == null) {
-                            addCard(newCard);
+                            context.read<CardBloc>().add(AddCardEvent(cardName: newCard));
                           } else {
-                            updateCard(newCard, card.id);
+                            context.read<CardBloc>().add(UpdateCardEvent(updatedCardName: newCard, cardId: card.id));
                           }
                           Navigator.pop(context);
                         }
@@ -380,7 +350,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
 
           else if(state is IncomeLoadedState){
             print("Rendering UI with incomes: ${state.incomes}");
-            return _incomesDisplay(state.incomes);
+            return _incomesDisplay(state.incomes, state.cards);
           }
           else{
             return Text("error");
@@ -392,7 +362,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
 
 
 
-Widget _incomesDisplay(List<Income>? incomes) {
+Widget _incomesDisplay(List<Income>? incomes, List<BankCard>? cards) {
   return ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
@@ -401,7 +371,7 @@ Widget _incomesDisplay(List<Income>? incomes) {
         return GestureDetector(
             onTap: () =>
                 _showIncomesDialog(
-                    income: incomes?[index], id: incomes?[index].id),
+                    income: incomes?[index], id: incomes?[index].id, cards: cards),
             child: ListTile(
               leading: Container(
                 width: 45, // Размер квадрата
@@ -447,7 +417,7 @@ Widget _incomesDisplay(List<Income>? incomes) {
 
 
 
-      void _showIncomesDialog({Income? income, int? id})
+      void _showIncomesDialog({Income? income, int? id, List<BankCard>? cards})
   {
     // Если редактируем, заполняем поля текущими данными, иначе оставляем пустыми
     incomeTitleController.text = income?.title ?? "";

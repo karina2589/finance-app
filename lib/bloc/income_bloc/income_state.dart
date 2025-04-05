@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_frontend/jsonModels/BankCard.dart';
 
 import '../../jsonModels/Income.dart';
 
@@ -12,7 +13,8 @@ class IncomeLoadingState extends IncomeState{}
 
 class IncomeLoadedState extends IncomeState{
   final List<Income>? incomes;
-  IncomeLoadedState({required this.incomes});
+  final List<BankCard>? cards;
+  IncomeLoadedState({required this.incomes, required this.cards});
 }
 
 class IncomeInitialState extends IncomeState{}

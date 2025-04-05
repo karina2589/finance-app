@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_frontend/bloc/income_bloc/income_event.dart';
 import 'package:flutter_frontend/bloc/income_bloc/income_state.dart';
+import 'package:flutter_frontend/jsonModels/BankCard.dart';
+import 'package:flutter_frontend/jsonModels/BankCards.dart';
 import 'package:flutter_frontend/jsonModels/Incomes.dart';
 
 import '../../jsonModels/Income.dart';
@@ -12,11 +14,12 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState>{
       emit(IncomeLoadingState());
       try{
         final List<Income>? incomes = await Incomes.fetchIncomes();
+        final List<BankCard>? cards = await BankCards.fetchCards();
         if(incomes == null || incomes.isEmpty){
           emit(IncomeEmptyState());
         }else {
           print("Emitting IncomeLoadedState with ${incomes.length} incomes");
-          emit(IncomeLoadedState(incomes: incomes));
+          emit(IncomeLoadedState(incomes: incomes, cards:  cards));
         }
       }catch(e){
         emit(IncomeLoadingErrorState());
@@ -44,7 +47,7 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState>{
       try {
         bool success = await Incomes.updateIncome(event.updatedIncome, event.incomeId);
         if (success) {
-          emit(IncomeLoadingState()); // Обновляем UI
+          emit(IncomeUpdatedState()); // Обновляем UI
           await Future.delayed(Duration(milliseconds: 500)); // Ожидание обновления БД
           add(LoadIncomeEvent());
         } else {
@@ -60,7 +63,7 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState>{
       try {
         bool success = await Incomes.deleteIncome(event.incomeId);
         if (success) {
-          emit(IncomeLoadingState());
+          emit(IncomeUpdatedState());
           await Future.delayed(Duration(milliseconds: 500));
           add(LoadIncomeEvent());
         } else {

@@ -111,8 +111,8 @@ class BankCards{
 }
 
 void main() async{
- bool success = await BankCards.updateCard("Halyk",14);
- if(success){
+ // bool success = await BankCards.updateCard("Halyk",14);
+ // if(success){
    List<BankCard>? cards = await BankCards.fetchCards();
    if(cards != null){
      for( var card in cards){
@@ -120,6 +120,6 @@ void main() async{
        print(card.title);
        //print(card.incomes);
      }
-   }
+  // }
  }
 }

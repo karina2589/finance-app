@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_frontend/bloc/cards_bloc/cards_bloc.dart';
 import 'package:flutter_frontend/bloc/expenses_bloc/expense_bloc.dart';
 import 'package:flutter_frontend/bloc/expenses_bloc/expense_event.dart';
 import 'package:flutter_frontend/bloc/expenses_bloc/expense_state.dart';
@@ -11,12 +12,11 @@ import 'package:flutter_frontend/jsonModels/BankCard.dart';
 import 'package:flutter_frontend/jsonModels/BankCards.dart';
 import 'package:flutter_frontend/jsonModels/Expense.dart';
 import 'package:flutter_frontend/config/ExpenseCategories.dart';
-import 'package:flutter_frontend/jsonModels/Savings.dart';
 import 'package:flutter_frontend/models/AppTheme.dart';
 import 'package:flutter_frontend/models/BankCardSwiper.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../jsonModels/CardDetail.dart';
-import '../jsonModels/Income.dart';
+import 'package:intl/intl.dart';
 import '../jsonModels/Saving.dart';
 
 void main() {
@@ -27,6 +27,9 @@ void main() {
           BlocProvider<IncomeBloc>(create: (context) => IncomeBloc()),
           BlocProvider<ExpenseBloc>(create: (context) => ExpenseBloc()),
           BlocProvider<SavingBloc>(create: (context) => SavingBloc()),
+          BlocProvider<CardBloc>(
+            create: (context) => CardBloc(BlocProvider.of<IncomeBloc>(context)),
+          ),
         ],
         child: MaterialApp(
           home: Scaffold(body: BudgetPlanner()),
@@ -52,9 +55,6 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
   TextEditingController savingTargetAmountController = TextEditingController();
   TextEditingController savingDueDate = TextEditingController();
 
- // List<Expense>? expenses = [];
-  //List<Saving>? savings = [];
-  // List<Income>? incomes = [];
   List<BankCard>? cards = [];
   List<CardDetail>? cardDetails = [];
   bool isLoading = true;
@@ -75,39 +75,6 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
       });
     }
   }
-  // Future<void> fetchSavings() async {
-  //   List<Saving>? data = await Savings.fetchSavings();
-  //   setState(() {
-  //     savings = data;
-  //     isLoading = false;
-  //   });
-  // }
-  //
-  // Future<void> updateSaving(Map<String, dynamic> updateExpense, int id) async {
-  //   bool success = await Savings.updateSaving(updateExpense, id);
-  //   if (success) {
-  //     fetchSavings();
-  //   }
-  // }
-  //
-  // Future<void> addSaving(Map<String, dynamic> newSaving) async {
-  //   bool success = await Savings.addSavings(newSaving);
-  //   if (success) {
-  //     fetchSavings();
-  //   }
-  //   savingDueDate.clear();
-  //   savingDescriptionController.clear();
-  //   savingTargetAmountController.clear();
-  //   savingTitleController.clear();
-  // }
-  //
-  // Future<void> deleteSaving(int id) async {
-  //   bool success = await Savings.deleteSaving(id);
-  //   if (success) {
-  //     fetchSavings();
-  //     Navigator.pop(context);
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -305,52 +272,6 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
 
 
   }
-  Widget _displayListTile(
-      BuildContext context,
-      String noInfoYet1,
-      String noInfoYet2,
-      String noInfoTitle,
-      IconData icon,
-      List<dynamic>? list,
-      Widget displayFunction
-      ) {
-    if (isLoading) {
-      return Center(child: CircularProgressIndicator());
-    } else if (list == null || list.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 50, color: Colors.grey),
-            SizedBox(height: 10),
-            Text(
-              "No expenses yet",
-              style: GoogleFonts.inder(fontSize: 18, color: Colors.black54),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: GoogleFonts.inder(fontSize: 16, color: Colors.black54),
-                  children: [
-                    TextSpan(text: noInfoYet1),
-                    WidgetSpan(
-                      child: Icon(Icons.add_circle_outline,
-                          size: 20, color: Colors.black54),
-                    ),
-                    TextSpan(text: noInfoYet2),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return displayFunction;
-  }
 
   Widget _expenseDisplay(List<Expense>? expenses) {
     return ListView.builder(
@@ -466,11 +387,16 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
     );
   }
 
+  String formatDate(String isoDate) {
+    DateTime dateTime = DateTime.parse(isoDate);
+    return DateFormat('yyyy-MM-dd').format(dateTime);
+  }
+
   void _showSavingsDialog({Saving? saving, int? id}) {
     savingTitleController.text = saving?.title ?? "";
     savingDescriptionController.text = saving?.description ?? "";
     savingTargetAmountController.text = saving?.targetAmount.toString() ?? "";
-    savingDueDate.text = saving?.dueDate.toString() ?? "";
+    savingDueDate.text = saving?.dueDate.toString() == null ? "" : formatDate(saving!.dueDate.toString());
 
     showModalBottomSheet(
         context: context,
@@ -793,6 +719,25 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
             initialDate: DateTime.now(),
             firstDate: DateTime(2000),
             lastDate: DateTime(2100),
+            builder: (context, child) {
+              return Theme(
+                data: ThemeData(
+                  primaryColor: Colors.deepPurple, // Основной цвет
+                  hintColor: Colors.amber, // Цвет выделения
+                  textTheme: TextTheme(
+                    bodyLarge: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
+                  ),
+                  dialogBackgroundColor: Colors.black87, // Цвет фона
+                  colorScheme: ColorScheme.light( // Темный стиль
+                    primary: Colors.green, // Цвет кнопок
+                    onPrimary: Colors.white, // Цвет текста кнопок
+                    surface: Colors.white, // Фон календаря
+                    onSurface: Colors.black, // Цвет цифр дней
+                  ),
+                ),
+                child: child!,
+              );
+            },
           );
 
           if (pickedDate != null) {

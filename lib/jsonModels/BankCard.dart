@@ -20,6 +20,7 @@ class BankCard {
   final String? createdAt;
   final String? updatedAt;
   final List<Income> incomes;
+  final double? balance;
   final String userId;
   final List<TransactionHistory> transactionHistory;
 
@@ -29,6 +30,7 @@ class BankCard {
     required this.createdAt,
     required this.updatedAt,
     required this.incomes,
+    required this.balance,
     required this.userId,
     required this.transactionHistory
   });
@@ -41,6 +43,7 @@ class BankCard {
         incomes: (json['Income'] as List<dynamic>?)
             ?.map((e) => Income.fromJson(e))
             .toList() ?? [],
+        balance:  (json['balance'] ?? 0).toDouble(),
         userId: json['userId'],
         transactionHistory: (json['TransactionHistory'] as List<dynamic>?)
             ?.map((e) => TransactionHistory.fromJson(e))

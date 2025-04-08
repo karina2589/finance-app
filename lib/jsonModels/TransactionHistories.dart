@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_frontend/config/AppConfig.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:intl/intl.dart';
 import 'TransactionHistory.dart';
 
 class TransactionHistories{
@@ -120,6 +120,33 @@ class TransactionHistories{
     return success;
   }
 
+  static Future<List<TransactionHistory>?> fetchExpenseTransactions() async{
+    final url = Uri.parse(AppConfig.transactionsEndPoint).replace(queryParameters: {"type": "EXPENSE"});
+    // final prefs = await SharedPreferences.getInstance();
+    // String? userId = prefs.getString('userId');
+
+    try{
+      final response = await http.get(url,
+        headers: {
+          // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
+          'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
+          // 'user-id': userId,
+          'Content-Type': 'application/json',
+        },
+
+      );
+      if(response.statusCode == 200){
+       // print("transactions: ${response.body}");
+        List<dynamic> data = jsonDecode(response.body);
+        return data.map((transaction) => TransactionHistory.fromJson(transaction)).toList();
+      }else{
+        print("transactions fetching error ${response.body}");
+      }
+    }catch(e){
+      print("transaction exception ${e}");
+    }
+  }
+
 }
 
 void main() async{
@@ -128,21 +155,40 @@ void main() async{
   // Map<String, dynamic> savingtransaction = {"savingId": 2, "amount": 145.3};
   // bool success = await TransactionHistories.addTransaction(savingtransaction, "saving");
   
-  bool success = await TransactionHistories.deleteTransaction(27);
+  // bool success = await TransactionHistories.deleteTransaction(27);
+  //
+  // if(success) {
+  // Предполагаем, что вы получаете список транзакций
+  var formatter = DateFormat('dd MMM yyyy'); // Исходный формат даты
+  var outputFormatter = DateFormat('dd.MM.yyyy'); // Требуемый формат
 
-  if(success) {
-    List<TransactionHistory>? transactions = await TransactionHistories
-        .fetchTransactions();
-    if (transactions != null) {
-      for (var tr in transactions) {
-        print("ID: ${tr.id}");
-        print("Amount: ${tr.amount}");
-        print("Card ID: ${tr.cardId}");
-        print("Saving ID: ${tr.savingId}");
-        print("Expense ID: ${tr.expenseId}");
-        print("expense : ${tr.expense}");
-        print("saving : ${tr.saving}");
-      }
-    }
+  // Получаем транзакции из вашего метода
+  List<TransactionHistory>? transactions = await TransactionHistories.fetchExpenseTransactions();
+
+  // Список для хранения обновленных данных
+  List<Map<String, dynamic>> updatedData = [];
+
+  if (transactions != null) {
+    // Преобразуем данные в список Map с обновленными датами
+    updatedData = transactions.map((tr) {
+      // Парсим исходную дату и форматируем ее в нужный вид
+      String originalDate = tr.createdAt; // Исходная дата из объекта TransactionHistory
+      DateTime parsedDate = formatter.parse(originalDate); // Парсим строку в DateTime
+      String formattedDate = outputFormatter.format(parsedDate); // Преобразуем в новый формат
+
+      // Возвращаем новый Map с обновленной датой
+      return {
+        'ID': tr.id,
+        'Amount': tr.amount,
+        'type': tr.type,
+        'created date': formattedDate, // Обновленная дата
+      };
+    }).toList();
+
+    // Передаем обновленные данные в другой класс для визуализации
   }
+
+  // Выводим обновленные данные в консоль
+  updatedData.sort((a, b) => a['ID'].compareTo(b['ID']));
+  print(updatedData);
 }

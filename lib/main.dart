@@ -23,13 +23,17 @@ void main() async {
   StreamAuth streamAuth = StreamAuth();
   runApp(MultiBlocProvider(providers:  [
     BlocProvider<IncomeBloc>(create: (context) => IncomeBloc(), lazy: false,),
-    BlocProvider<ExpenseBloc>(create: (context) => ExpenseBloc()),
-    BlocProvider<SavingBloc>(create: (context) => SavingBloc()),
+    BlocProvider<ExpenseBloc>(create: (context) => ExpenseBloc(), lazy: false,),
+    BlocProvider<SavingBloc>(create: (context) => SavingBloc(), lazy: false,),
+    BlocProvider<ExpenseTransactionBloc>(create: (context) => ExpenseTransactionBloc(BlocProvider.of<ExpenseBloc>(context)), lazy: false),
+    BlocProvider<SavingTransactionBloc>(create: (context) => SavingTransactionBloc(BlocProvider.of<SavingBloc>(context)), lazy: false,),
     BlocProvider<CardBloc>(
-      create: (context) => CardBloc(BlocProvider.of<IncomeBloc>(context)),
+      create: (context) => CardBloc(
+        BlocProvider.of<IncomeBloc>(context),
+        BlocProvider.of<ExpenseTransactionBloc>(context),
+        BlocProvider.of<SavingTransactionBloc>(context),
+      ),
     ),
-    BlocProvider<ExpenseTransactionBloc>(create: (context) => ExpenseTransactionBloc()),
-    BlocProvider<SavingTransactionBloc>(create: (context) => SavingTransactionBloc())
   ], child: StreamAuthScope(
    child: MyApp(router: router,),)
   ));

@@ -3,19 +3,39 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_frontend/bloc/cards_bloc/cards_event.dart';
 import 'package:flutter_frontend/bloc/cards_bloc/cards_state.dart';
+import 'package:flutter_frontend/bloc/expense_transactions_bloc/expense_transactions_bloc.dart';
+import 'package:flutter_frontend/bloc/expense_transactions_bloc/expense_transactions_state.dart';
 import 'package:flutter_frontend/bloc/income_bloc/income_bloc.dart';
+import 'package:flutter_frontend/bloc/savings_transacrtions_bloc/savings_transactions_bloc.dart';
+import 'package:flutter_frontend/bloc/savings_transacrtions_bloc/savings_transactions_state.dart';
 import 'package:flutter_frontend/jsonModels/BankCard.dart';
 import 'package:flutter_frontend/jsonModels/BankCards.dart';
 
 import '../income_bloc/income_state.dart';
 
 class CardBloc extends Bloc<CardEvent, CardState>{
-  late final StreamSubscription incomeBlocSubscription; // Подписка
+  late final StreamSubscription incomeBlocSubscription; // Подписка на доходы
+  late final StreamSubscription expenseTransactionBlocSubscription;
+  late final StreamSubscription savingTransactionBlocSubscription;
 
-  CardBloc(IncomeBloc incomeBloc) : super(CardInitialState()) {
+  CardBloc(IncomeBloc incomeBloc, ExpenseTransactionBloc expenseTransactionBloc, SavingTransactionBloc savingTransactionBloc) : super(CardInitialState()) {
     incomeBlocSubscription = incomeBloc.stream.listen((incomeState) {
       if (incomeState is IncomeUpdatedState) {
         print("IncomeBloc изменился → обновляем карточки");
+        add(LoadCardEvent());
+      }
+    });
+
+    expenseTransactionBlocSubscription = expenseTransactionBloc.stream.listen((expenseTransactionState){
+      if( expenseTransactionState is ExpenseTransactionLoadedState){
+        print("ExpenseTransactionBloc изменился → обновляем карточки");
+        add(LoadCardEvent());
+      }
+    });
+
+    savingTransactionBlocSubscription = savingTransactionBloc.stream.listen((savingTransactionState){
+      if(savingTransactionState is SavingTransactionLoadedState){
+        print("SavingTransactionBloc изменился → обновляем карточки");
         add(LoadCardEvent());
       }
     });

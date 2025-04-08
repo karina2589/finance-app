@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_frontend/bloc/expense_transactions_bloc/expense_transactions_event.dart';
 import 'package:flutter_frontend/bloc/expense_transactions_bloc/expense_transactions_state.dart';
+import 'package:flutter_frontend/bloc/expenses_bloc/expense_bloc.dart';
+import 'package:flutter_frontend/bloc/expenses_bloc/expense_state.dart';
 import 'package:flutter_frontend/jsonModels/TransactionHistories.dart';
 
 import '../../jsonModels/BankCard.dart';
@@ -9,7 +13,17 @@ import '../../jsonModels/Expense.dart';
 import '../../jsonModels/Expenses.dart';
 
 class ExpenseTransactionBloc extends Bloc<ExpenseTransactionEvent, ExpenseTransactionState>{
-  ExpenseTransactionBloc() : super(ExpenseTransactionInitialState()){
+  late final StreamSubscription expenseBlocSubscription;
+
+  ExpenseTransactionBloc(ExpenseBloc expenseBloc) : super(ExpenseTransactionInitialState()){
+
+    expenseBlocSubscription = expenseBloc.stream.listen((expenseState){
+      if(expenseState is ExpenseLoadedState){
+        print("ExpenseBloc изменился → обновляем карточки");
+        add(LoadExpenseTransactionEvent());
+      }
+    });
+
     on<LoadExpenseTransactionEvent>((event, emit) async{
       emit(ExpenseTransactionLoadingState());
       try{

@@ -19,24 +19,24 @@ import '../jsonModels/CardDetail.dart';
 import 'package:intl/intl.dart';
 import '../jsonModels/Saving.dart';
 
-void main() {
-  WidgetsFlutterBinding.ensureInitialized(); // Добавь эту строку
-  runApp(
-    MultiBlocProvider(
-        providers: [
-          BlocProvider<IncomeBloc>(create: (context) => IncomeBloc()),
-          BlocProvider<ExpenseBloc>(create: (context) => ExpenseBloc()),
-          BlocProvider<SavingBloc>(create: (context) => SavingBloc()),
-          BlocProvider<CardBloc>(
-            create: (context) => CardBloc(BlocProvider.of<IncomeBloc>(context)),
-          ),
-        ],
-        child: MaterialApp(
-          home: Scaffold(body: BudgetPlanner()),
-          theme: AppTheme.lightTheme,
-        )),
-  );
-}
+// void main() {
+//   WidgetsFlutterBinding.ensureInitialized(); // Добавь эту строку
+//   runApp(
+//     MultiBlocProvider(
+//         providers: [
+//           BlocProvider<IncomeBloc>(create: (context) => IncomeBloc()),
+//           BlocProvider<ExpenseBloc>(create: (context) => ExpenseBloc()),
+//           BlocProvider<SavingBloc>(create: (context) => SavingBloc()),
+//           BlocProvider<CardBloc>(
+//             create: (context) => CardBloc(BlocProvider.of<IncomeBloc>(context)),
+//           ),
+//         ],
+//         child: MaterialApp(
+//           home: Scaffold(body: BudgetPlanner()),
+//           theme: AppTheme.lightTheme,
+//         )),
+//   );
+// }
 
 class BudgetPlanner extends StatefulWidget {
   @override

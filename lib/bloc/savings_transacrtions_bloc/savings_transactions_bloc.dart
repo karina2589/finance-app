@@ -1,4 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_frontend/bloc/savings_bloc/savings_bloc.dart';
+import 'package:flutter_frontend/bloc/savings_bloc/savings_event.dart';
+import 'package:flutter_frontend/bloc/savings_bloc/savings_state.dart';
 import 'package:flutter_frontend/bloc/savings_transacrtions_bloc/savings_transactions_event.dart';
 import 'package:flutter_frontend/bloc/savings_transacrtions_bloc/savings_transactions_state.dart';
 import 'package:flutter_frontend/jsonModels/Saving.dart';
@@ -9,7 +14,15 @@ import '../../jsonModels/BankCards.dart';
 import '../../jsonModels/TransactionHistories.dart';
 
 class SavingTransactionBloc extends Bloc<SavingsTransactionEvent, SavingsTransactionState>{
-  SavingTransactionBloc(): super(SavingTransactionInitialState()){
+  late final StreamSubscription savingBlocSubscription;
+
+  SavingTransactionBloc(SavingBloc savingBloc): super(SavingTransactionInitialState()){
+    savingBlocSubscription = savingBloc.stream.listen((savingState){
+      if(savingState is SavingsLoadedState){
+        print("SavingsBloc изменился → обновляем карточки");
+        add(LoadSavingsTransactionEvent());
+      }
+    });
     on<LoadSavingsTransactionEvent>((event, emit) async{
       emit(SavingTransactionLoadingState());
       try{

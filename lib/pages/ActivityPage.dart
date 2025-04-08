@@ -15,14 +15,14 @@ import 'package:flutter_frontend/jsonModels/Savings.dart';
 import 'package:flutter_frontend/jsonModels/TransactionHistories.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: ActivityPage(),
-    ),
-  ));
-}
+// void main() {
+//   runApp(MaterialApp(
+//     home: Scaffold(
+//       backgroundColor: Colors.grey.shade50,
+//       body: ActivityPage(),
+//     ),
+//   ));
+// }
 
 class ActivityPage extends StatefulWidget {
   const ActivityPage({super.key});
@@ -345,10 +345,14 @@ class _ActivityPageState extends State<ActivityPage> {
                   // Кнопка добавления транзакции
                   ElevatedButton(
                     onPressed: () async {
+                      final rawInput = expenseAmountController.text.trim();
+                      final normalizedInput = rawInput.replaceAll(',', '.');
+
                       if(item is Expense){
+
                         if (expenseAmountController.text.isNotEmpty && selectedCardId != null) {
                           Map<String, dynamic> newExpenseTransaction = {
-                            "amount": double.tryParse(expenseAmountController.text) ?? 0.0,
+                            "amount": double.tryParse(normalizedInput) ?? 0.0,
                             "expenseId": id,
                             "cardId": selectedCardId // добавляем ID карты в транзакцию
                           };
@@ -358,7 +362,7 @@ class _ActivityPageState extends State<ActivityPage> {
                       }else if(item is Saving){
                         if (expenseAmountController.text.isNotEmpty && selectedCardId != null) {
                           Map<String, dynamic> newSavingTransaction = {
-                            "amount": double.tryParse(expenseAmountController.text) ?? 0.0,
+                            "amount": double.tryParse(normalizedInput) ?? 0.0,
                             "savingId": id,
                             "cardId": selectedCardId // добавляем ID карты в транзакцию
                           };

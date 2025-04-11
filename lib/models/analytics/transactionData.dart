@@ -1,28 +1,39 @@
+import 'package:intl/intl.dart';
 import '../../jsonModels/TransactionHistories.dart';
 import '../../jsonModels/TransactionHistory.dart';
 
-void main() async{
-  // Map<String, dynamic> expenseTransaction = {"expenseId": 15, "amount": 5.6};
-  // bool success = await TransactionHistories.addTransaction(expenseTransaction, "expense");
-  // Map<String, dynamic> savingtransaction = {"savingId": 2, "amount": 145.3};
-  // bool success = await TransactionHistories.addTransaction(savingtransaction, "saving");
+class TransactionData {
+ late final List<Map<String, dynamic>> expenseTransactions;
+ late final List<Map<String, dynamic>> savingTransactions;
 
-  // bool success = await TransactionHistories.deleteTransaction(27);
-  //
-  // if(success) {
-  List<TransactionHistory>? transactions = await TransactionHistories
-      .fetchTransactions();
-  if (transactions != null) {
-    for (var tr in transactions) {
-      print("ID: ${tr.id}");
-      print("Amount: ${tr.amount}");
-      print("Card ID: ${tr.cardId}");
-      print("Saving ID: ${tr.savingId}");
-      print("Expense ID: ${tr.expenseId}");
-      print("expense : ${tr.expense}");
-      print("saving : ${tr.saving}");
-      print("date: ${tr.createdAt}");
-    }
-    // }
-  }
+ final DateFormat _inputFormat = DateFormat('dd MMM yyyy');
+ final DateFormat _outputFormat = DateFormat('dd.MM.yyyy');
+
+ Future<void> loadTransactions() async {
+  expenseTransactions = await _fetchAndFormat("expense");
+  savingTransactions = await _fetchAndFormat("saving");
+ }
+
+ // Приватный метод, работающий как прослойка между БД и представлением
+ Future<List<Map<String, dynamic>>> _fetchAndFormat(String type) async {
+  List<TransactionHistory>? transactions =
+  await TransactionHistories.fetchTransactionsByType(type);
+
+  if (transactions == null) return [];
+
+  List<Map<String, dynamic>> updatedData = transactions.map((tr) {
+   DateTime parsedDate = _inputFormat.parse(tr.createdAt);
+   String formattedDate = _outputFormat.format(parsedDate);
+
+   return {
+    'ID': tr.id,
+    'Amount': tr.amount,
+    'type': tr.type,
+    'Date': formattedDate,
+   };
+  }).toList();
+
+  updatedData.sort((a, b) => a['ID'].compareTo(b['ID']));
+  return updatedData;
+ }
 }

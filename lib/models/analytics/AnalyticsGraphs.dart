@@ -8,7 +8,6 @@ import 'package:flutter_frontend/models/analytics/data.dart';
 void main(){
   runApp(MaterialApp(home: LineAreaPointPage(),));
 }
-
 final _monthDayFormat = DateFormat('MM-dd');
 
 class LineAreaPointPage extends StatelessWidget {
@@ -84,7 +83,7 @@ class LineAreaPointPage extends StatelessWidget {
                       ),
                     ),
                     'sales': Variable(
-                      accessor: (TimeSeriesSales datum 0) => datum.sales,
+                      accessor: (TimeSeriesSales datum) => datum.sales,
                     ),
                   },
                   marks: [

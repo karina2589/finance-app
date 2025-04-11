@@ -120,8 +120,9 @@ class TransactionHistories{
     return success;
   }
 
-  static Future<List<TransactionHistory>?> fetchExpenseTransactions() async{
-    final url = Uri.parse(AppConfig.transactionsEndPoint).replace(queryParameters: {"type": "EXPENSE"});
+  static Future<List<TransactionHistory>?> fetchTransactionsByType(String type) async{
+    String transactionType = type.toUpperCase();
+    final url = Uri.parse(AppConfig.transactionsEndPoint).replace(queryParameters: {"type": transactionType});
     // final prefs = await SharedPreferences.getInstance();
     // String? userId = prefs.getString('userId');
 
@@ -146,7 +147,6 @@ class TransactionHistories{
       print("transaction exception ${e}");
     }
   }
-
 }
 
 void main() async{
@@ -163,7 +163,7 @@ void main() async{
   var outputFormatter = DateFormat('dd.MM.yyyy'); // Требуемый формат
 
   // Получаем транзакции из вашего метода
-  List<TransactionHistory>? transactions = await TransactionHistories.fetchExpenseTransactions();
+  List<TransactionHistory>? transactions = await TransactionHistories.fetchTransactionsByType("expense");
 
   // Список для хранения обновленных данных
   List<Map<String, dynamic>> updatedData = [];

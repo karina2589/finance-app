@@ -1,82 +1,138 @@
-import 'package:flutter/material.dart';
-import 'package:graphic/graphic.dart';
-import 'package:flutter_frontend/models/analytics/data.dart';
-
-void main() {
-  runApp(MaterialApp(home: LineChart()));
-}
-
-class LineChart extends StatefulWidget {
-  @override
-  _LineChartState createState() => _LineChartState();
-}
-
-class _LineChartState extends State<LineChart> with TickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<int> _animation;
-  List<Map<String, dynamic>> _data = [];
-  final List<Map<String, dynamic>> _fullData = invalidData;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: Duration(seconds: 2));
-    _animation = IntTween(begin: 0, end: _fullData.length).animate(_controller)
-      ..addListener(() {
-        setState(() {
-          _data = _fullData.take(_animation.value).toList();
-        });
-      });
-    _controller.forward();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Center(
-          child: Container(
-            margin: const EdgeInsets.only(top: 10),
-            width: 350,
-            height: 300,
-            child: Chart(
-              rebuild: true,
-              data: _data,
-              variables: {
-                'Date': Variable(
-                  accessor: (Map map) => map['Date'] as String,
-                  scale: OrdinalScale(tickCount: 5),
-                ),
-                'Close': Variable(
-                  accessor: (Map map) => (map['Close'] ?? double.nan) as num,
-                ),
-              },
-              marks: [
-                LineMark(
-                  shape: ShapeEncode(value: BasicLineShape(smooth: true)),
-                  size: SizeEncode(value: 0.5),
-                  transition: Transition(duration: const Duration(seconds: 2)),
-                  entrance: {
-                    MarkEntrance.x,
-                    MarkEntrance.y,
-                    MarkEntrance.opacity,
-                  },
-                ),
-              ],
-              axes: [
-                Defaults.horizontalAxis,
-                Defaults.verticalAxis,
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-}
+// import 'package:flutter/material.dart';
+// import 'package:flutter_frontend/models/analytics/LineChart.dart';
+// import 'package:flutter_frontend/models/analytics/transactionData.dart';
+//
+//
+// void main(){
+//   runApp(MaterialApp(home: TogglePageViewExample(),));
+// }
+// class TogglePageViewExample extends StatefulWidget {
+//   @override
+//   _TogglePageViewExampleState createState() => _TogglePageViewExampleState();
+// }
+//
+// class _TogglePageViewExampleState extends State<TogglePageViewExample> {
+//   PageController _pageController = PageController();
+//   List<bool> _selected = [true, false, false];
+//   List<Map<String, dynamic>> expenses = [];
+//   List<Map<String, dynamic>> savings = [];
+//   bool isLoading = true;
+//
+//   void getData() async {
+//     final transactionData = TransactionData();
+//     await transactionData.loadTransactions();
+//     print("FETCHING TRANSACTIONS....");
+//     print(transactionData);
+//
+//     setState(() {
+//       print("Expense:");
+//       expenses = _aggregateByDate(transactionData.expenseTransactions);
+//       print(transactionData.expenseTransactions);
+//       print(expenses);
+//
+//       print("Saving:");
+//       savings = _aggregateByDate(transactionData.savingTransactions);
+//       print(transactionData.savingTransactions);
+//       print(savings);
+//       isLoading = false;
+//     });
+//   }
+//
+//   List<Map<String, dynamic>> _aggregateByDate(
+//       List<Map<String, dynamic>> transactions) {
+//     final Map<String, double> aggregated = {};
+//
+//     for (var tx in transactions) {
+//       final date = tx['Date'].toString() ?? null;
+//       final amount = tx['Amount'];
+//
+//       if (date == null || amount == null) continue;
+//
+//       final parsedAmount = (amount as num).toDouble();
+//
+//       if (aggregated.containsKey(date)) {
+//         aggregated[date] = aggregated[date]! + parsedAmount;
+//       } else {
+//         aggregated[date] = parsedAmount;
+//       }
+//     }
+//     print(aggregated);
+//
+// // Преобразуем в List<Map<String, double>>
+//     List<Map<String, dynamic>> result =
+//     aggregated.entries.map<Map<String, dynamic>>((entry) {
+//       return {
+//         "Date": entry.key,
+//         "Amount": entry.value.toDouble(), // обязательно приведение к double
+//       };
+//     }).toList();
+//
+//     return result;
+//   }
+//
+//   @override
+//   void initState() {
+//     // TODO: implement initState
+//     super.initState();
+//     getData();
+//     print("GETTING DATA - LOADING...");
+//   }
+//
+//
+//
+//   void _onTogglePressed(int index) {
+//     setState(() {
+//       for (int i = 0; i < _selected.length; i++) {
+//         _selected[i] = i == index;
+//       }
+//       _pageController.animateToPage(index,
+//           duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+//     });
+//   }
+//
+//   void _onPageChanged(int index) {
+//     setState(() {
+//       for (int i = 0; i < _selected.length; i++) {
+//         _selected[i] = i == index;
+//       }
+//     });
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: Text("Toggle PageView")),
+//       body: Column(
+//         children: [
+//           SizedBox(height: 20),
+//           ToggleButtons(
+//             isSelected: _selected,
+//             onPressed: _onTogglePressed,
+//             children: [
+//               Padding(
+//                   padding: EdgeInsets.symmetric(horizontal: 16),
+//                   child: Text("Page 1")),
+//               Padding(
+//                   padding: EdgeInsets.symmetric(horizontal: 16),
+//                   child: Text("Page 2")),
+//               Padding(
+//                   padding: EdgeInsets.symmetric(horizontal: 16),
+//                   child: Text("Page 3")),
+//             ],
+//           ),
+//           Expanded(
+//             child: PageView(
+//               controller: _pageController,
+//               onPageChanged: _onPageChanged,
+//               children: [
+//                 LineChart(transactions1: expenses, transactions2: savings),
+//                 Center(child: Text("Page 2")),
+//                 LineChart(transactions1: expenses, transactions2: savings),
+//               ],
+//             ),
+//           )
+//         ],
+//       ),
+//     );
+//   }
+// }

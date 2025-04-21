@@ -5,15 +5,15 @@ import 'package:flutter_frontend/config/AppConfig.dart';
 import 'package:flutter_frontend/jsonModels/Analytics.dart';
 import 'package:http/http.dart' as http;
 
-class AnalyticsProvider{
-  
-  static Future<TransactionsSummary?> fetchTransactionsSummary() async{
+class AnalyticsProvider {
+  static Future<TransactionsSummary?> fetchTransactionsSummary() async {
     final url = Uri.parse(AppConfig.transactionsSummaryEndPoint);
     // final prefs = await SharedPreferences.getInstance();
     // String? userId = prefs.getString('userId');
 
-    try{
-      final response = await http.get(url,
+    try {
+      final response = await http.get(
+        url,
         headers: {
           // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
           'User-ID': "2cbbbf55-81f0-4475-8fe0-e29c664b6aa3",
@@ -31,11 +31,40 @@ class AnalyticsProvider{
     } catch (e) {
       print(e);
     }
+  }
+
+  static Future<TransactionsSummary?> fetchTotalsByPeriod(int period) async {
+    final url = Uri.parse(AppConfig.transactionsSummaryEndPoint).replace(queryParameters: {
+      'period': period.toString(), 
+    });
+    // final prefs = await SharedPreferences.getInstance();
+    // String? userId = prefs.getString('userId');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
+          'User-ID': "2cbbbf55-81f0-4475-8fe0-e29c664b6aa3",
+          // Adding User-ID in the header
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return TransactionsSummary.fromJson(data);
+      } else {
+        print('error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print(e);
     }
+  }
 }
 
 // void main() async{
-//   TransactionsSummary? summary = await AnalyticsProvider.fetchTransactionsSummary();
+//   TransactionsSummary? summary = await AnalyticsProvider.fetchTotalsByPeriod(6);
 //   if(summary!= null){
 //     print(summary.totalSaving);
 //     print(summary.totalSpending);

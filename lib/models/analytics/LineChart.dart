@@ -1,28 +1,50 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/models/analytics/transactionData.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:graphic/graphic.dart';
-import 'package:flutter_frontend/models/analytics/data.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: LineChart(),
-  ));
-}
+
+// void main() {
+//   runApp(MaterialApp(
+//     home: LineChart(),
+//   ));
+// }
 
 class LineChart extends StatefulWidget {
+  final List<Map<String, dynamic>> transactions;
+  final int period;
+
+  LineChart({required this.transactions, required this.period});
+
   @override
-  State<StatefulWidget> createState() => LineChartState();
+  State<StatefulWidget> createState()=> LineChartState();
 }
 
-class LineChartState extends State<LineChart> {
-  List<Map<String, dynamic>> expenses = [];
-  List<Map<String, dynamic>> savings = [];
-
+class LineChartState extends State<LineChart>{
+  late List<Map<String, dynamic>> _displayData;
   bool isFirstTouch = true;
   bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateGraph();
+  }
+
+  @override
+  void didUpdateWidget(covariant LineChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.period != widget.period || oldWidget.transactions != widget.transactions) {
+      _updateGraph();
+    }
+  }
+
+  void _updateGraph() async {
+    setState(() => isLoading = true);
+    await Future.delayed(Duration(milliseconds: 600)); // имитация подгрузки
+    _displayData = widget.transactions;
+    setState(() => isLoading = false);
+  }
+
 
   List<String> getTicks(List<Map<String, dynamic>> data) {
     final allDates = data.map((e) => e['Date'].toString()).toList();
@@ -42,99 +64,79 @@ class LineChartState extends State<LineChart> {
     final maxValue = amounts.reduce((a, b) => a > b ? a : b).toDouble();
 
     // Округляем вверх до ближайшего "удобного" числа
-    final step = (maxValue / 4).ceilToDouble(); // делим на 4 — т.к. 5 делений = 4 промежутка
+    final step = (maxValue / 4)
+        .ceilToDouble(); // делим на 4 — т.к. 5 делений = 4 промежутка
     final maxRounded = step * 4;
 
     // Генерируем 5 равных значений
     return List.generate(5, (i) => step * i);
   }
 
-
-  void getData() async {
-    final transactionData = TransactionData();
-    await transactionData.loadTransactions();
-
-    setState(() {
-      print("Expense:");
-      expenses = _aggregateByDate(transactionData.expenseTransactions);
-      print(transactionData.expenseTransactions);
-      print(expenses);
-
-      print("Saving:");
-      savings = _aggregateByDate(transactionData.savingTransactions);
-      print(transactionData.savingTransactions);
-      print(savings);
-      isLoading = false;
-    });
-  }
-
-  List<Map<String, dynamic>> _aggregateByDate(
-      List<Map<String, dynamic>> transactions) {
-    final Map<String, double> aggregated = {};
-
-    for (var tx in transactions) {
-      final date = tx['Date'].toString() ?? null;
-      final amount = tx['Amount'];
-
-      if (date == null || amount == null) continue;
-
-      final parsedAmount = (amount as num).toDouble();
-
-      if (aggregated.containsKey(date)) {
-        aggregated[date] = aggregated[date]! + parsedAmount;
-      } else {
-        aggregated[date] = parsedAmount;
-      }
-    }
-    print(aggregated);
-
-// Преобразуем в List<Map<String, double>>
-    List<Map<String, dynamic>> result =
-        aggregated.entries.map<Map<String, dynamic>>((entry) {
-      return {
-        "Date": entry.key,
-        "Amount": entry.value.toDouble(), // обязательно приведение к double
-      };
-    }).toList();
-
-    return result;
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getData();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Center(
-                child: Column(
+        child: Column(
       children: [
         SizedBox(
           height: 20,
         ),
-        Text("Expenses line graph", style: GoogleFonts.poppins(
-            fontSize: 17, fontWeight: FontWeight.w400, color: Colors.black),),
-        lineGraph(expenses),
-
-        SizedBox(
-          height: 20,
+        Text(
+          "Expenses line graph",
+          style: GoogleFonts.poppins(
+              fontSize: 17, fontWeight: FontWeight.w400, color: Colors.black),
         ),
-        Text("Savings line graph",  style: GoogleFonts.poppins(
-            fontSize: 17, fontWeight: FontWeight.w400, color: Colors.black)),
-        lineGraph(savings),
+        lineGraph(widget.transactions),
+
+        // SizedBox(
+        //   height: 20,
+        // ),
+        // Text("Savings line graph",  style: GoogleFonts.poppins(
+        //     fontSize: 17, fontWeight: FontWeight.w400, color: Colors.black)),
+        // lineGraph(transactions2),
       ],
     ));
   }
 
+
   Widget lineGraph(List<Map<String, dynamic>> data) {
-    return isLoading
-        ?  Container(
-        margin: EdgeInsets.all(100),
-        child: CircularProgressIndicator())
-        : Container(
+    return   isLoading?  SizedBox(
+    height: 250,
+    child: Center(child: CircularProgressIndicator()),
+    ) : data.isEmpty
+        ? Padding(
+        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.analytics_outlined, size: 50, color: Colors.grey),
+            SizedBox(height: 10),
+            Text(
+              "No transactions yet",
+              style: GoogleFonts.inder(fontSize: 18, color: Colors.black54),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: GoogleFonts.inder(
+                      fontSize: 16, color: Colors.black54),
+                  children: [
+                    TextSpan(
+                        text:
+                        "Please add new transactions for showing analytics"),
+                    // WidgetSpan(
+                    //   child: Icon(Icons.add_circle_outline,
+                    //       size: 20, color: Colors.black54),
+                    // ),
+                    TextSpan(text: "Not enough data to show analytics"),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ))
+        :Container(
             margin: const EdgeInsets.only(top: 10),
             width: 350,
             height: 250,
@@ -149,16 +151,15 @@ class LineChartState extends State<LineChart> {
                 ),
                 'Amount': Variable(
                   accessor: (Map map) => (map['Amount'] ?? double.nan) as num,
-                  scale: LinearScale(min: 0,  ticks: getYAxisTicks(data)),
+                  scale: LinearScale(min: 0, ticks: getYAxisTicks(data)),
                 ),
               },
               marks: [
                 AreaMark(
                   shape: ShapeEncode(value: BasicAreaShape(smooth: true)),
-                  color: ColorEncode(
-                      value: Defaults.colors10.first.withAlpha(80)),
+                  color:
+                      ColorEncode(value: Defaults.colors10.first.withAlpha(80)),
                 ),
-
                 LineMark(
                   shape: ShapeEncode(value: BasicLineShape(smooth: true)),
                   size: SizeEncode(value: 1.5),
@@ -172,7 +173,6 @@ class LineChartState extends State<LineChart> {
                     MarkEntrance.opacity,
                   },
                 ),
-
                 PointMark(
                   size: SizeEncode(value: 6),
                   color: ColorEncode(value: Colors.deepPurple),
@@ -180,31 +180,30 @@ class LineChartState extends State<LineChart> {
                   selected: {
                     'touchMove': {0, 3} // выбраны точки с индексами 0 и 3
                   },
-
                 ),
               ],
               axes: [
-                Defaults.horizontalAxis..label = LabelStyle(
-                  textStyle: GoogleFonts.poppins(
-                    fontSize: 11,
-                    // fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
-                  offset: Offset(5, 8)
-                )
+                Defaults.horizontalAxis
+                  ..label = LabelStyle(
+                      textStyle: GoogleFonts.poppins(
+                        fontSize: 11,
+                        // fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                      offset: Offset(5, 8))
                 // ..label = LabelStyle(
                 //   // rotation: 30,
                 //   align: Alignment.centerRight, // Align the labels to the right
                 // ),
                 ,
-                Defaults.verticalAxis..label = LabelStyle(
-                    textStyle: GoogleFonts.poppins(
-                      fontSize: 11,
-                      // fontWeight: FontWeight.bold,
-                      color: Colors.grey,
-                    ),
-                  offset: Offset(-5, 0)
-                ),
+                Defaults.verticalAxis
+                  ..label = LabelStyle(
+                      textStyle: GoogleFonts.poppins(
+                        fontSize: 11,
+                        // fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                      offset: Offset(-5, 0)),
               ],
               // coord: RectCoord(color: const Color(0xffdddddd)),
               selections: {
@@ -225,4 +224,5 @@ class LineChartState extends State<LineChart> {
               crosshair: CrosshairGuide(followPointer: [true, true]),
             ));
   }
-}
+
+ }

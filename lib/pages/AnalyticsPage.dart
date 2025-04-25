@@ -40,6 +40,7 @@ class AnalyticsPageState extends State<AnalyticsPage> {
   String? filePath;
   String? fileName;
   bool readingFile = false;
+  bool readingDone = false;
 
   List<Map<String, dynamic>> expenses = [];
   List<Map<String, dynamic>> savings = [];
@@ -98,6 +99,7 @@ class AnalyticsPageState extends State<AnalyticsPage> {
         statement = statementTr;
         statusMessage = "file was successfully read";
         readingFile = false;
+        readingDone = true;
         for (var tr in statement.statementTransactions) {
           print("Statement transaction ");
           print(tr.title);
@@ -105,13 +107,20 @@ class AnalyticsPageState extends State<AnalyticsPage> {
           print(tr.amount);
         }
       });
+      // Даем системе немного времени после setState
       await Future.delayed(Duration(milliseconds: 100));
-      showConfirmationDialog();
+
+      // Вызываем после фрейма, чтобы избежать ошибок навигации
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showConfirmationDialog();
+      });
     } else {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось загрузить файл')),
-      );
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Закрыть диалог
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to upload file')),
+        );
+      }
     }
   }
 
@@ -326,12 +335,13 @@ void _showFileUploadDialog() {
                                 onPressed: () {
                                   setState((){
                                     readingFile = true;
+                                    uploadFile(
+                                        selectedCardId!, filePath!, selectedBank! );
                                   });
-                                  uploadFile(
-                                      selectedCardId!, filePath!, selectedBank! );
                                 },
                                 child:Center(
-                                  child: readingFile
+                                  child:
+                                  readingFile
                                       ? SizedBox(
                                     width: 20,
                                     height: 20,
@@ -398,7 +408,7 @@ void _showFileUploadDialog() {
 }
 
 void showConfirmationDialog() async{
-  Navigator.pop(context); // закрываем старый диалог
+  //Navigator.pop(context); // закрываем старый диалог
   await Future.delayed(Duration(milliseconds: 200)); // немного подождать
   List<StatementTransaction>? transactions = statement.statementTransactions;
 

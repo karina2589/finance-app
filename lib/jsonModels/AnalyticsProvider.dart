@@ -61,13 +61,52 @@ class AnalyticsProvider {
       print(e);
     }
   }
-}
 
-// void main() async{
-//   TransactionsSummary? summary = await AnalyticsProvider.fetchTotalsByPeriod(6);
-//   if(summary!= null){
-//     print(summary.totalSaving);
-//     print(summary.totalSpending);
-//     print(summary.totalIncome);
-//   }
-// }
+  static Future<Map<String, dynamic>?> balanceOverview() async{
+    final url = Uri.parse(AppConfig.balanceOverviewEndPoint);
+/*
+
+{totalIncome: 89737, totalExpenses: 652, currentBalance: 893310}
+ */
+    try{
+      final response = await http.get(
+        url,
+        headers: {
+          // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
+          'User-ID': "2cbbbf55-81f0-4475-8fe0-e29c664b6aa3",
+          // Adding User-ID in the header
+          'Content-Type': 'application/json',
+        },
+      );
+      if(response.statusCode == 200){
+        // print(response.body);
+        final data = jsonDecode(response.body);
+        if (data is Map<String, dynamic>) {
+          return data;
+        } else {
+          print("Unexpected data format: ${response.body}");
+          return null;
+        }
+      } else {
+        print("Failed to load data. Status code: ${response.body}");
+        return null;
+      }
+    }catch(e){
+      print("exception with fetching balance overview $e");
+    }
+  }
+  }
+
+void main() async{
+  // TransactionsSummary? summary = await AnalyticsProvider.fetchTotalsByPeriod(6);
+  // if(summary!= null){
+  //   print(summary.totalSaving);
+  //   print(summary.totalSpending);
+  //   print(summary.totalIncome);
+  // }
+
+  Map<String, dynamic>? data = await AnalyticsProvider.balanceOverview();
+  if(data!=null){
+    print(data);
+  }
+}

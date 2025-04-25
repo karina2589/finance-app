@@ -32,19 +32,19 @@ class _UserInfoCardState extends State<UserInfoCard> {
   loadUserData() async {
     final user = await User.fetchData();
     if (user != null) {
-      if(mounted){
-      setState(() {
-        _nameController.text = user.username;
-        _fullnameController.text = user.fullname ?? "";
-        _emailController.text = user.email ?? "";
-        _dobController.text = user.dob ?? "";
-        _selectedGender = user.gender?.toLowerCase().trim() == "male"
-            ? 1
-            : user.gender?.toLowerCase().trim() == "female"
-            ? 0
-            : null;
-      });
-      print(user.gender);
+      if (mounted) {
+        setState(() {
+          _nameController.text = user.username;
+          _fullnameController.text = user.fullname ?? "";
+          _emailController.text = user.email ?? "";
+          _dobController.text = user.dob ?? "";
+          _selectedGender = user.gender?.toLowerCase().trim() == "male"
+              ? 1
+              : user.gender?.toLowerCase().trim() == "female"
+                  ? 0
+                  : null;
+        });
+        print(user.gender);
       }
     }
   }
@@ -73,12 +73,21 @@ class _UserInfoCardState extends State<UserInfoCard> {
           child: Container(
             padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.green,
+              // gradient: LinearGradient(
+              //   colors: [Colors.green.shade100, Colors.green.shade200, Colors.green.shade300],
+              //   begin: Alignment.topLeft,
+              //   end: Alignment.bottomRight,
+              // ),
+              border: Border.all(color: Colors.green),
+              color: Colors.green.shade100,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
               message,
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: GoogleFonts.poppins(
+                  color: Colors.green.shade500,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
           ),
@@ -89,11 +98,10 @@ class _UserInfoCardState extends State<UserInfoCard> {
     overlay.insert(overlayEntry);
 
     // Автоматически убираем через 2 секунды
-    Future.delayed(Duration(seconds: 15), () {
+    Future.delayed(Duration(seconds: 4), () {
       overlayEntry.remove();
     });
   }
-
 
   void _toggleEdit() async {
     if (_isEditing && _hasChanges) {
@@ -105,13 +113,14 @@ class _UserInfoCardState extends State<UserInfoCard> {
         gender: _selectedGender == 0
             ? "Female"
             : _selectedGender == 1
-            ? "Male"
-            : null,
+                ? "Male"
+                : null,
       );
 
       showTopSnackBar(context, updateStatus);
 
-      print("Сохранено: ${_nameController.text}, ${_fullnameController.text}, ${_emailController.text}");
+      print(
+          "Сохранено: ${_nameController.text}, ${_fullnameController.text}, ${_emailController.text}");
     }
 
     // Теперь изменяем состояние внутри setState() синхронно
@@ -134,32 +143,29 @@ class _UserInfoCardState extends State<UserInfoCard> {
       margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(10),
         ),
-        color: Colors.grey.shade50,
+        color: AppTheme.mainBackColor,
         child: Padding(
           padding: EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Account details',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  // Padding(
-                  //   padding: EdgeInsets.symmetric(horizontal: 20),
-                  //   child: ElevatedButton(
-                  //     style: ElevatedButton.styleFrom(
-                  //       backgroundColor: Colors.red.shade700
-                  //     ),
-                  //       onPressed: () {
-                  //       StreamAuthScope.of(context).logout();
-                  //       },
-                  //       child: Text('Log Out')),
-                  // )
-                ],
+              SizedBox(
+                height: 10,
               ),
+              Align(
+                alignment: Alignment.center,
+                child: initialAvatar(_nameController.text),
+              ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //   children: [
+              //     Text('Account details',
+              //         style: Theme.of(context).textTheme.titleMedium),
+              //
+              //   ],
+              // ),
               SizedBox(height: 10),
               _buildEditableRow("Username", _nameController),
               _buildEditableRow("Full name", _fullnameController),
@@ -195,7 +201,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
             child: Text(
                 textAlign: TextAlign.center,
                 label,
-                style: GoogleFonts.ubuntu(
+                style: GoogleFonts.poppins(
                     color: Colors.black,
                     fontSize: 16,
                     fontWeight: FontWeight.w400)),
@@ -209,7 +215,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
                         textAlignVertical: TextAlignVertical.center,
                         controller: controller,
                         onChanged: _onTextChanged,
-                        style: GoogleFonts.ubuntu(
+                        style: GoogleFonts.poppins(
                             color: Colors.black,
                             fontSize: 16,
                             fontWeight: FontWeight.w300),
@@ -228,7 +234,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
                           borderRadius: BorderRadius.circular(10)),
                       child: Text(controller.text,
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.ubuntu(
+                          style: GoogleFonts.poppins(
                               color: Colors.black,
                               fontSize: 16,
                               fontWeight: FontWeight.w300)),
@@ -237,6 +243,32 @@ class _UserInfoCardState extends State<UserInfoCard> {
               ),
         ],
       ),
+    );
+  }
+
+  Widget initialAvatar(String name) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Black circle
+        Container(
+          width: 70,
+          height: 70,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            shape: BoxShape.circle,
+          ),
+        ),
+        // First letter of the name
+        Text(
+          name.isNotEmpty ? name[0] : '?',
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 
@@ -252,7 +284,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
             child: Text(
                 textAlign: TextAlign.center,
                 label,
-                style: GoogleFonts.ubuntu(
+                style: GoogleFonts.poppins(
                     color: Colors.black,
                     fontSize: 16,
                     fontWeight: FontWeight.w400)),
@@ -275,7 +307,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
                           borderRadius: BorderRadius.circular(10)),
                       child: Text(controller.text,
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.ubuntu(
+                          style: GoogleFonts.poppins(
                               color: Colors.black,
                               fontSize: 16,
                               fontWeight: FontWeight.w300)),
@@ -298,7 +330,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
             child: Text(
               "Gender",
               textAlign: TextAlign.center,
-              style: GoogleFonts.ubuntu(
+              style: GoogleFonts.poppins(
                   color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.w400),
@@ -342,7 +374,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
       child: Text(
         genderText,
         textAlign: TextAlign.center,
-        style: GoogleFonts.ubuntu(
+        style: GoogleFonts.poppins(
             color: Colors.black, fontSize: 16, fontWeight: FontWeight.w300),
       ),
     );

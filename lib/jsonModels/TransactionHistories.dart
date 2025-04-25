@@ -41,6 +41,32 @@ class TransactionHistories{
     }
   }
 
+  static Future<List<TransactionHistory>?> fetchMonthTransactions() async{
+    final url = Uri.parse(AppConfig.transactionsEndPoint).replace(queryParameters: {
+      'period': "month",
+    });
+
+    try{
+      final response = await http.get(url,
+        headers: {
+          // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
+          'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
+          // 'user-id': userId,
+          'Content-Type': 'application/json',
+        },
+      );
+      if(response.statusCode == 200){
+        print("transactions: ${response.body}");
+        List<dynamic> data = jsonDecode(response.body);
+        return data.map((transaction) => TransactionHistory.fromJson(transaction)).toList();
+      }else{
+        print("transactions fetching error ${response.body}");
+      }
+    }catch(e){
+      print("transaction exception ${e}");
+    }
+  }
+
   static Future<bool> addTransaction(Map<String, dynamic> newTransaction, String transactionType) async{
     String url = "";
     if(transactionType == "expense"){
@@ -150,45 +176,54 @@ class TransactionHistories{
 }
 
 void main() async{
-  // Map<String, dynamic> expenseTransaction = {"expenseId": 15, "amount": 5.6};
-  // bool success = await TransactionHistories.addTransaction(expenseTransaction, "expense");
-  // Map<String, dynamic> savingtransaction = {"savingId": 2, "amount": 145.3};
-  // bool success = await TransactionHistories.addTransaction(savingtransaction, "saving");
-  
-  // bool success = await TransactionHistories.deleteTransaction(27);
-  //
-  // if(success) {
-  // Предполагаем, что вы получаете список транзакций
-  var formatter = DateFormat('dd MMM yyyy'); // Исходный формат даты
-  var outputFormatter = DateFormat('dd.MM.yyyy'); // Требуемый формат
 
-  // Получаем транзакции из вашего метода
-  List<TransactionHistory>? transactions = await TransactionHistories.fetchTransactionsByType("expense");
-
-  // Список для хранения обновленных данных
-  List<Map<String, dynamic>> updatedData = [];
-
-  if (transactions != null) {
-    // Преобразуем данные в список Map с обновленными датами
-    updatedData = transactions.map((tr) {
-      // Парсим исходную дату и форматируем ее в нужный вид
-      String originalDate = tr.createdAt; // Исходная дата из объекта TransactionHistory
-      DateTime parsedDate = formatter.parse(originalDate); // Парсим строку в DateTime
-      String formattedDate = outputFormatter.format(parsedDate); // Преобразуем в новый формат
-
-      // Возвращаем новый Map с обновленной датой
-      return {
-        'ID': tr.id,
-        'Amount': tr.amount,
-        'type': tr.type,
-        'created date': formattedDate, // Обновленная дата
-      };
-    }).toList();
-
-    // Передаем обновленные данные в другой класс для визуализации
+  List<TransactionHistory>? monthTransactions = await TransactionHistories.fetchMonthTransactions();
+  if(monthTransactions!=null){
+    for(var tr in monthTransactions){
+      print(tr.type);
+      print(tr.amount);
+      print(tr.createdAt);
+    }
   }
-
-  // Выводим обновленные данные в консоль
-  updatedData.sort((a, b) => a['ID'].compareTo(b['ID']));
-  print(updatedData);
+  // // Map<String, dynamic> expenseTransaction = {"expenseId": 15, "amount": 5.6};
+  // // bool success = await TransactionHistories.addTransaction(expenseTransaction, "expense");
+  // // Map<String, dynamic> savingtransaction = {"savingId": 2, "amount": 145.3};
+  // // bool success = await TransactionHistories.addTransaction(savingtransaction, "saving");
+  //
+  // // bool success = await TransactionHistories.deleteTransaction(27);
+  // //
+  // // if(success) {
+  // // Предполагаем, что вы получаете список транзакций
+  // var formatter = DateFormat('dd MMM yyyy'); // Исходный формат даты
+  // var outputFormatter = DateFormat('dd.MM.yyyy'); // Требуемый формат
+  //
+  // // Получаем транзакции из вашего метода
+  // List<TransactionHistory>? transactions = await TransactionHistories.fetchTransactionsByType("expense");
+  //
+  // // Список для хранения обновленных данных
+  // List<Map<String, dynamic>> updatedData = [];
+  //
+  // if (transactions != null) {
+  //   // Преобразуем данные в список Map с обновленными датами
+  //   updatedData = transactions.map((tr) {
+  //     // Парсим исходную дату и форматируем ее в нужный вид
+  //     String originalDate = tr.createdAt; // Исходная дата из объекта TransactionHistory
+  //     DateTime parsedDate = formatter.parse(originalDate); // Парсим строку в DateTime
+  //     String formattedDate = outputFormatter.format(parsedDate); // Преобразуем в новый формат
+  //
+  //     // Возвращаем новый Map с обновленной датой
+  //     return {
+  //       'ID': tr.id,
+  //       'Amount': tr.amount,
+  //       'type': tr.type,
+  //       'created date': formattedDate, // Обновленная дата
+  //     };
+  //   }).toList();
+  //
+  //   // Передаем обновленные данные в другой класс для визуализации
+  // }
+  //
+  // // Выводим обновленные данные в консоль
+  // updatedData.sort((a, b) => a['ID'].compareTo(b['ID']));
+  // print(updatedData);
 }

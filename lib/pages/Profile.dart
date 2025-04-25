@@ -19,39 +19,119 @@ class Profile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         extendBodyBehindAppBar: true,
-        backgroundColor: AppTheme.mainBackColor,
-        body:
-        // Center(
-        //     child:
-            SingleChildScrollView(
-                child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
+        backgroundColor: Colors.grey.shade50,
+        body: SingleChildScrollView(
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          // mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // Container(
-            //   decoration: BoxDecoration(
-            //     border: Border.symmetric(horizontal: BorderSide(color: AppTheme.widgetColor, width: 2))
-            //   ),
-            //   child: Padding(padding: EdgeInsets.symmetric(vertical: 15), child: Text(
-            //       'Robert Johnson',
-            //       style:   GoogleFonts.inder(textStyle: Theme.of(context).textTheme.titleLarge)
-            //   ),),
-            // ),
-            UserInfoCard(),
 
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade700),
-                  onPressed: () {
-                    StreamAuthScope.of(context).logout();
-                  },
-                  child: Text('Log Out')),
-            )
+            UserInfoCard(),
+            SizedBox(height: 10,),
+
+            /*
+            account settings
+
+            general -> change password
+            notifications
+            your data in balance box
+
+             */
+
+            _accountSettings(context),
+            SizedBox(height: 10,),
+
+
+            Divider(
+              indent: 10,
+              endIndent: 10,
+            ),
+
+            // sign out
+            SizedBox(height: 10,),
+
+              Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: TextButton(
+                      onPressed: () {
+                        StreamAuthScope.of(context).logout();
+                      },
+                      child: RichText(text: TextSpan(
+                          children: [
+                            WidgetSpan(child: Icon(Icons.logout_outlined, size: 20, color: Colors.black,)),
+                            TextSpan(
+                              text: '  Sign Out',
+                              style: GoogleFonts.poppins(
+                                  fontSize: 17, color: Colors.black, fontWeight: FontWeight.w400),
+                            )
+                          ]
+                      ))
+
+
+                  ))
+          //  )
+
           ],
         ))
-    //)
+        //)
+        );
+  }
+
+  Widget _accountSettings(BuildContext context){
+    return Padding(padding: EdgeInsets.symmetric(horizontal: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+
+      children: [
+        Padding(padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Text('Account details',
+          style: Theme.of(context).textTheme.titleMedium,),),
+        //general
+        TextButton(
+            onPressed: () {},
+            child: RichText(text: TextSpan(
+                children: [
+                  WidgetSpan(child: Icon(Icons.settings, size: 20, color: Colors.black,)),
+                  TextSpan(
+                    text: '  General',
+                    style: GoogleFonts.poppins(
+                        fontSize: 17, color: Colors.black, fontWeight: FontWeight.w400),
+                  )
+                ]
+            ))
+        ),
+
+        //notifications
+        TextButton(
+            onPressed: () {},
+            child: RichText(text: TextSpan(
+                children: [
+                  WidgetSpan(child: Icon(Icons.notifications_rounded, size: 20, color: Colors.black,)),
+                  TextSpan(
+                    text: '  Notifications',
+                    style: GoogleFonts.poppins(
+                        fontSize: 17, color: Colors.black, fontWeight: FontWeight.w400),
+                  )
+                ]
+            )),
+        ),
+
+        //data security
+        TextButton(
+          onPressed: () {},
+          child: RichText(text: TextSpan(
+              children: [
+                WidgetSpan(child: Icon(Icons.security_rounded, size: 20, color: Colors.black,)),
+                TextSpan(
+                  text: '  Your data in Balance Box',
+                  style: GoogleFonts.poppins(
+                      fontSize: 17, color: Colors.black, fontWeight: FontWeight.w400),
+                )
+              ]
+          )),
+        ),
+      ],
+    )
     );
   }
 }

@@ -84,7 +84,7 @@ class StreamAuth {
     }
   }
 
-  Future<bool> register(String username, String password) async{
+  Future<String> register(String username, String password) async{
     final response = await http.post(
       Uri.parse(registerEndPoint),
       headers:  {'Content-Type': 'application/json'},
@@ -92,10 +92,14 @@ class StreamAuth {
     );
 
     if(response.statusCode==201){
-      return true;
+
+      return "Registered";
     }else{
       print('Registration failed: ${response.body}');
-      return false;
+      final errorMessage = jsonDecode(response.body);
+      String message = errorMessage['message'];
+      print(message);
+      return message;
     }
   }
 

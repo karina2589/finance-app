@@ -32,7 +32,7 @@ class AppTheme {
       scaffoldBackgroundColor: Colors.white,
       appBarTheme:  AppBarTheme(
         backgroundColor: primaryColor,
-        titleTextStyle: GoogleFonts.inriaSans(
+        titleTextStyle: GoogleFonts.poppins(
           color: Colors.white,
           fontSize: 15,
           fontWeight: FontWeight.bold,
@@ -40,37 +40,37 @@ class AppTheme {
       ),
 
       textTheme: TextTheme(
-        bodyLarge: GoogleFonts.inriaSans(
-          color: Colors.white,
-          fontSize: 23,
-            fontWeight: FontWeight.w600
+        bodyLarge: GoogleFonts.poppins(
+          color: Colors.black,
+          fontSize: 22,
+            fontWeight: FontWeight.w700
         ),
-        titleLarge: GoogleFonts.inriaSans(
+        titleLarge: GoogleFonts.poppins(
           color: textColor,
           fontSize: 25,
           fontWeight: FontWeight.w500,
         ),
-        titleMedium: GoogleFonts.inriaSans(
+        titleMedium: GoogleFonts.poppins(
           fontWeight: FontWeight.w500,
           fontSize: 20,
           color: textColor
         ),
-        titleSmall: GoogleFonts.inriaSans(
+        titleSmall: GoogleFonts.poppins(
           fontSize: 16,
           color: textColor,
-          fontWeight: FontWeight.w400
+          fontWeight: FontWeight.w600
         ),
-        bodyMedium: GoogleFonts.inriaSans(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: 19,
+        bodyMedium: GoogleFonts.poppins(
+          color: Colors.black,
+          fontWeight: FontWeight.w500,
+          fontSize: 18,
         ),
-        bodySmall: GoogleFonts.inriaSans(
+        bodySmall: GoogleFonts.poppins(
           color: Colors.white,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w400,
           fontSize: 16,
         ) ,
-        headlineLarge: GoogleFonts.inriaSans(
+        headlineLarge: GoogleFonts.poppins(
           color: textColor,
           fontSize: 25,
           fontWeight: FontWeight.w500,
@@ -81,7 +81,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
-          textStyle: GoogleFonts.inriaSans(
+          textStyle: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -97,8 +97,8 @@ class AppTheme {
           borderRadius: BorderRadius.all(Radius.circular(8)),
           borderSide: BorderSide.none,
         ),
-        hintStyle: GoogleFonts.inriaSans(
-          color: Colors.black54,
+        hintStyle: GoogleFonts.poppins(
+          color: Colors.black54
         ),
       ),
     );

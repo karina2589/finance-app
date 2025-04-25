@@ -56,6 +56,9 @@ class AppGoRouter {
           // Разрешаем доступ к /register
           return AppPath.login;
         }
+        if(registering){
+          return AppPath.register;
+        }
 
         // if (loggedIn) {
         //   final prefs = await SharedPreferences.getInstance();

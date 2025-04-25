@@ -38,6 +38,7 @@ model TransactionHistory {
   final Map<String, dynamic>? expense;
   final Map<String, dynamic>? saving;
   final Map<String, dynamic>? card;
+  final Map<String, dynamic>? income;
 
   TransactionHistory(
       {required this.id,
@@ -50,6 +51,7 @@ model TransactionHistory {
       required this.savingId,
       required this.incomeId,
        this.saving,
+        this.income,
       required this.userId,
       required this.cardId,
        this.card});
@@ -88,6 +90,7 @@ model TransactionHistory {
       expense: json['expense'] != null ? Map<String, dynamic>.from(json['expense']) : null,
       saving: json['saving'] != null ? Map<String, dynamic>.from(json['saving']) : null,
       card: json['card'] != null ? Map<String, dynamic>.from(json['card']) : null,
+      income: json['income'] != null ? Map<String, dynamic>.from(json['income']) : null,
     );
   }
 }

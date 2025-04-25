@@ -3,6 +3,7 @@ import 'package:flutter_frontend/models/AppTheme.dart';
 import 'package:flutter_frontend/requests/Authentication/StreamAuthScope.dart';
 import 'package:flutter_frontend/route/router.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../requests/Authentication/StreamAuth.dart';
 
@@ -72,106 +73,34 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(
-            height: 200,
+            height: 100,
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 50),
+            padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Column(
               textDirection: TextDirection.ltr,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                 Text(
-                  'Log In',
-                  style: TextStyle(
-                    color: Colors.green.shade800,
-                    fontSize: 27,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                _welcome(),
                 const SizedBox(
-                  height: 50,
+                  height: 45,
                 ),
-                TextField(
-                  controller: _usernameController,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xFF393939),
-                    fontSize: 13,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w400,
-                  ),
-                  decoration:  InputDecoration(
-                    labelText: 'Username',
-                    labelStyle: TextStyle(
-                      color: Colors.green.shade300,
-                      fontSize: 15,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      borderSide: BorderSide(
-                        width: 1,
-                       color: Colors.green.shade900,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      borderSide: BorderSide(
-                        width: 1,
-                        color: Colors.green.shade900,
-                      ),
-                    ),
-                  ),
-                ),
+                _textField(_usernameController, "Username", false),
                 const SizedBox(
-                  height: 30,
+                  height: 10,
                 ),
-                TextField(
-                  controller: _passController,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xFF393939),
-                    fontSize: 15,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w400,
-                  ),
-                  decoration:  InputDecoration(
-                    labelText: 'Password',
-                    labelStyle: TextStyle(
-                      color: Colors.green.shade200,
-                      fontSize: 15,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      borderSide: BorderSide(
-                        width: 1,
-                        color: Colors.green.shade900,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      borderSide: BorderSide(
-                        width: 1,
-                          color: Colors.green.shade900
-                      ),
-                    ),
-                  ),
-                ),
+                _textField(_passController, "Password", true),
                 const SizedBox(
                   height: 25,
                 ),
                 ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  borderRadius: const BorderRadius.all(Radius.circular(25)),
                   child: SizedBox(
-                    width: 329,
-                    height: 56,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: 55,
                     child: ElevatedButton(
                       onPressed: (){
                         if(_isLoading){
@@ -182,33 +111,32 @@ class _LoginScreenState extends State<LoginScreen> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.shade800,
+                        backgroundColor: Colors.amber,
                       ),
                       child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
+                          ? const CircularProgressIndicator(color: Colors.black)
+                          :  Text(
                         'Sign In',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
+                        style: GoogleFonts.poppins(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(
-                  height: 15,
+                  height: 35,
                 ),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                     Text(
                       'Don’t have an account?',
-                      style: TextStyle(
-                        color: Color(0xFF837E93),
-                        fontSize: 13,
-                        fontFamily: 'Poppins',
+                      style: GoogleFonts.poppins(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -217,12 +145,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     InkWell(
                       onTap:  () => context.go(AppPath.register),
-                      child: const Text(
-                        'Sign Up',
-                        style: TextStyle(
-                          color: Color(0xFF755DC1),
-                          fontSize: 13,
-                          fontFamily: 'Poppins',
+                      child:  Text(
+                        'Register!',
+                        style: GoogleFonts.poppins(
+                          color: Colors.amber,
+                          fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -232,12 +159,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   height: 15,
                 ),
-                const Text(
+                 Text(
                   'Forget Password?',
-                  style: TextStyle(
-                    color: Color(0xFF755DC1),
-                    fontSize: 13,
-                    fontFamily: 'Poppins',
+                  style: GoogleFonts.poppins(
+                    color: Colors.amber,
+                    fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -247,6 +173,70 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
     )
+    );
+  }
+  Widget _welcome(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(Icons.monetization_on_rounded, color: Colors.amber,size:  180,),
+        SizedBox(height: 15,),
+        Text("Welcome to Balance Box!", style: GoogleFonts.poppins(
+          color: Colors.black,
+          fontWeight: FontWeight.w800,
+          fontSize: 23
+        ),textAlign: TextAlign.center,
+        ),
+        Text("Keep your savings in check", style: GoogleFonts.poppins(
+            color: Colors.grey.shade700,
+            fontWeight: FontWeight.w400,
+            fontSize: 16
+        ),textAlign: TextAlign.center,
+        )
+      ],
+    );
+  }
+
+  Widget _textField(
+      TextEditingController controller, String title, bool NotVisible) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      height: 55,
+      alignment: Alignment.center,
+      child: TextField(
+          obscureText: NotVisible,
+          textAlign: TextAlign.center,
+          textAlignVertical: TextAlignVertical.center,
+          controller: controller,
+          style: GoogleFonts.poppins(
+              fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black),
+          decoration: InputDecoration(
+              isDense: true, // Уменьшает плотность
+              contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            // Reduce height
+              filled: true,
+              fillColor: Colors.grey.shade200,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25)),
+                borderSide: BorderSide(
+                  width: 1,
+                  color: Colors.grey.shade200,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25)),
+                borderSide: BorderSide(
+                  width: 2,
+                  color: Colors.amber,
+                ),
+              ),
+              labelText: title,
+              labelStyle: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey.shade600)
+      )
+      ),
     );
   }
 }

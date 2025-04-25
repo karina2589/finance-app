@@ -17,5 +17,8 @@ class AppConfig {
   static const String transactionsSummaryEndPoint = "$baseUrl/analytics/transaction-summary";
   static const String statementUploadEndPoint = "$baseUrl/document/bankstatement";
   static const String transactionsByPeriod = "$baseUrl/analytics/transactions";
-  //https://financemanager-tor6.onrender.com/api/v1/users
+  static const String balanceOverviewEndPoint = "$baseUrl/analytics/balance-overview";
+
+//https://financemanager-tor6.onrender.com/api/v1/users
+
 }

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_frontend/config/AppConfig.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'TransactionHistory.dart';
 
 class TransactionHistories{
@@ -17,27 +18,29 @@ class TransactionHistories{
   
   static Future<List<TransactionHistory>?> fetchTransactions() async{
     final url = Uri.parse(AppConfig.transactionsEndPoint);
-    // final prefs = await SharedPreferences.getInstance();
-    // String? userId = prefs.getString('userId');
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-    try{
-      final response = await http.get(url,
-        headers: {
-          // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
-          'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-          // 'user-id': userId,
-          'Content-Type': 'application/json',
-        },
-      );
-      if(response.statusCode == 200){
-        print("transactions: ${response.body}");
-        List<dynamic> data = jsonDecode(response.body);
-        return data.map((transaction) => TransactionHistory.fromJson(transaction)).toList();
-      }else{
-        print("transactions fetching error ${response.body}");
+    if(userId!=null){
+      try{
+        final response = await http.get(url,
+          headers: {
+            // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
+            'user-id': userId,
+            // 'user-id': userId,
+            'Content-Type': 'application/json',
+          },
+        );
+        if(response.statusCode == 200){
+          print("transactions: ${response.body}");
+          List<dynamic> data = jsonDecode(response.body);
+          return data.map((transaction) => TransactionHistory.fromJson(transaction)).toList();
+        }else{
+          print("transactions fetching error ${response.body}");
+        }
+      }catch(e){
+        print("transaction exception ${e}");
       }
-    }catch(e){
-      print("transaction exception ${e}");
     }
   }
 
@@ -46,24 +49,29 @@ class TransactionHistories{
       'period': "month",
     });
 
-    try{
-      final response = await http.get(url,
-        headers: {
-          // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
-          'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-          // 'user-id': userId,
-          'Content-Type': 'application/json',
-        },
-      );
-      if(response.statusCode == 200){
-        print("transactions: ${response.body}");
-        List<dynamic> data = jsonDecode(response.body);
-        return data.map((transaction) => TransactionHistory.fromJson(transaction)).toList();
-      }else{
-        print("transactions fetching error ${response.body}");
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+
+    if(userId!=null){
+      try{
+        final response = await http.get(url,
+          headers: {
+            // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
+            'user-id': userId,
+            // 'user-id': userId,
+            'Content-Type': 'application/json',
+          },
+        );
+        if(response.statusCode == 200){
+          print("transactions: ${response.body}");
+          List<dynamic> data = jsonDecode(response.body);
+          return data.map((transaction) => TransactionHistory.fromJson(transaction)).toList();
+        }else{
+          print("transactions fetching error ${response.body}");
+        }
+      }catch(e){
+        print("transaction exception ${e}");
       }
-    }catch(e){
-      print("transaction exception ${e}");
     }
   }
 
@@ -76,25 +84,31 @@ class TransactionHistories{
       url = AppConfig.savingTransactionsEndPoint;
     }
 
+
     bool success  =false;
     Map<String, dynamic> filteredExpense = newTransaction..removeWhere((key, value) => value == null);
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(filteredExpense),
-      );
 
-      if (response.statusCode == 200) {
-        success = true;
-      }else{
-        print(response.body);
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+    if(userId!=null){
+      try {
+        final response = await http.post(
+          Uri.parse(url),
+          headers: {
+            'user-id': userId,
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(filteredExpense),
+        );
+
+        if (response.statusCode == 200) {
+          success = true;
+        }else{
+          print(response.body);
+        }
+      } catch (e) {
+        print("Error updating expense: $e");
       }
-    } catch (e) {
-      print("Error updating expense: $e");
     }
 
     return success;
@@ -124,53 +138,60 @@ class TransactionHistories{
     Map<String, dynamic> filteredTransaction = updatedTransaction..removeWhere((key, value) => value == null);
 
     String url = "${AppConfig.transactionsEndPoint}/$id";
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-    try{
-      final response = await http.put(Uri.parse(url),
-      headers: {
-        'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-        'Content-Type': 'application/json',
-      },
-        body: jsonEncode(filteredTransaction)
-      );
+    if(userId!=null){
+      try{
+        final response = await http.put(Uri.parse(url),
+            headers: {
+              'user-id': userId,
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(filteredTransaction)
+        );
 
-      if(response.statusCode == 200){
-        success = true;
-        print("transaction updated");
-      }else{
-        print("error updating transaction ${response.body}");
+        if(response.statusCode == 200){
+          success = true;
+          print("transaction updated");
+        }else{
+          print("error updating transaction ${response.body}");
+        }
+      }catch(e){
+        print("exception caught for transaction update $e");
       }
-    }catch(e){
-      print("exception caught for transaction update $e");
     }
+
     return success;
   }
 
   static Future<List<TransactionHistory>?> fetchTransactionsByType(String type) async{
     String transactionType = type.toUpperCase();
     final url = Uri.parse(AppConfig.transactionsEndPoint).replace(queryParameters: {"type": transactionType});
-    // final prefs = await SharedPreferences.getInstance();
-    // String? userId = prefs.getString('userId');
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-    try{
-      final response = await http.get(url,
-        headers: {
-          // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
-          'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-          // 'user-id': userId,
-          'Content-Type': 'application/json',
-        },
+    if(userId!=null){
+      try{
+        final response = await http.get(url,
+          headers: {
+            // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
+            'user-id': userId,
+            // 'user-id': userId,
+            'Content-Type': 'application/json',
+          },
 
-      );
-      if(response.statusCode == 200){
-       // print("transactions: ${response.body}");
-        List<dynamic> data = jsonDecode(response.body);
-        return data.map((transaction) => TransactionHistory.fromJson(transaction)).toList();
-      }else{
-        print("transactions fetching error ${response.body}");
+        );
+        if(response.statusCode == 200){
+          // print("transactions: ${response.body}");
+          List<dynamic> data = jsonDecode(response.body);
+          return data.map((transaction) => TransactionHistory.fromJson(transaction)).toList();
+        }else{
+          print("transactions fetching error ${response.body}");
+        }
+      }catch(e){
+        print("transaction exception ${e}");
       }
-    }catch(e){
-      print("transaction exception ${e}");
     }
   }
 }

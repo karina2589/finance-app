@@ -18,6 +18,11 @@ class AppConfig {
   static const String statementUploadEndPoint = "$baseUrl/document/bankstatement";
   static const String transactionsByPeriod = "$baseUrl/analytics/transactions";
   static const String balanceOverviewEndPoint = "$baseUrl/analytics/balance-overview";
+  static const String initializeChatSession = "$baseUrl/chat/initialize-session";
+  static const String sendMessageEndPoint = "$baseUrl/chat/send-message";
+  static const String assistantInsightsEndPoint = "$baseUrl/chat/insights";
+  static const String chatMessagesEndPoint = "$baseUrl/chat/session-messages";
+  static const String chatSessionsEndPoint = "$baseUrl/chat/sessions";
 
 //https://financemanager-tor6.onrender.com/api/v1/users
 

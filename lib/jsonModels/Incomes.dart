@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_frontend/config/AppConfig.dart';
 import 'package:flutter_frontend/jsonModels/Income.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:shared_preferences/shared_preferences.dart';
 
 class Incomes {
@@ -18,16 +19,16 @@ class Incomes {
 
   static Future<List<Income>?> fetchIncomes() async {
     final url = Uri.parse(AppConfig.incomesEndPoint);
-    // final prefs = await SharedPreferences.getInstance();
-    // String? userId = prefs.getString('userId');
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-    // if(userId != null){
+    if(userId != null){
     try {
       final response = await http.get(
         url,
         headers: {
           // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
-          'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
+          'user-id': userId,
           // 'user-id': userId,
           // Adding User-ID in the header
           'Content-Type': 'application/json',
@@ -46,11 +47,14 @@ class Incomes {
     }
   }
 
-  // }
+  }
 
   static Future<bool> addNewIncome(Map<String, dynamic> newIncome) async {
     bool success = false;
     final Uri url = Uri.parse(AppConfig.incomesEndPoint);
+
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
     /*
     title              String
@@ -67,24 +71,25 @@ class Incomes {
     Map<String, dynamic> filteredIncome = newIncome
       ..removeWhere((key, value) => value == null);
 
-    try {
-      final response = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json',
-            'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-          },
-          body: jsonEncode(filteredIncome));
+    if(userId!=null){
+      try {
+        final response = await http.post(url,
+            headers: {
+              'Content-Type': 'application/json',
+              'user-id': userId,
+            },
+            body: jsonEncode(filteredIncome));
 
-      if (response.statusCode == 200) {
-        success = true;
-        print("income added successfully");
-      } else {
-        print("problem with adding new income ${response.body}");
+        if (response.statusCode == 200) {
+          success = true;
+          print("income added successfully");
+        } else {
+          print("problem with adding new income ${response.body}");
+        }
+      } catch (e) {
+        print("error with adding new income $e");
       }
-    } catch (e) {
-      print("error with adding new income $e");
     }
-
     return success;
   }
 
@@ -111,24 +116,29 @@ class Incomes {
     String url = "${AppConfig.incomesEndPoint}/$id";
     Map<String, dynamic> filteredIncome = updatedIncome..removeWhere((key, value) => value == null);
 
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-    try{
-      final response = await http.put(Uri.parse(url),
-      headers: {
-        'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-        'Content-Type': 'application/json',
-      },
-        body: jsonEncode(filteredIncome)
-      );
-      if(response.statusCode == 200){
-        success = true;
-        print("income successfully updated");
-      }else{
-        print("error with updating income ${response.body}");
+    if(userId!= null){
+      try{
+        final response = await http.put(Uri.parse(url),
+            headers: {
+              'user-id': userId,
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(filteredIncome)
+        );
+        if(response.statusCode == 200){
+          success = true;
+          print("income successfully updated");
+        }else{
+          print("error with updating income ${response.body}");
+        }
+      }catch(e){
+        print("error with updating income $e");
       }
-    }catch(e){
-      print("error with updating income $e");
     }
+
     return success;
   }
 }

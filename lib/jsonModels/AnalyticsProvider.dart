@@ -4,32 +4,35 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_frontend/config/AppConfig.dart';
 import 'package:flutter_frontend/jsonModels/Analytics.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AnalyticsProvider {
   static Future<TransactionsSummary?> fetchTransactionsSummary() async {
     final url = Uri.parse(AppConfig.transactionsSummaryEndPoint);
-    // final prefs = await SharedPreferences.getInstance();
-    // String? userId = prefs.getString('userId');
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
-          'User-ID': "2cbbbf55-81f0-4475-8fe0-e29c664b6aa3",
-          // Adding User-ID in the header
-          'Content-Type': 'application/json',
-        },
-      );
+    if(userId!= null){
+      try {
+        final response = await http.get(
+          url,
+          headers: {
+            // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
+            'User-ID': userId,
+            // Adding User-ID in the header
+            'Content-Type': 'application/json',
+          },
+        );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return TransactionsSummary.fromJson(data);
-      } else {
-        print('error: ${response.statusCode}');
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          return TransactionsSummary.fromJson(data);
+        } else {
+          print('error: ${response.statusCode}');
+        }
+      } catch (e) {
+        print(e);
       }
-    } catch (e) {
-      print(e);
     }
   }
 
@@ -37,28 +40,30 @@ class AnalyticsProvider {
     final url = Uri.parse(AppConfig.transactionsSummaryEndPoint).replace(queryParameters: {
       'period': period.toString(), 
     });
-    // final prefs = await SharedPreferences.getInstance();
-    // String? userId = prefs.getString('userId');
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
-          'User-ID': "2cbbbf55-81f0-4475-8fe0-e29c664b6aa3",
-          // Adding User-ID in the header
-          'Content-Type': 'application/json',
-        },
-      );
+    if(userId!=null){
+      try {
+        final response = await http.get(
+          url,
+          headers: {
+            // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
+            'User-ID': userId,
+            // Adding User-ID in the header
+            'Content-Type': 'application/json',
+          },
+        );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return TransactionsSummary.fromJson(data);
-      } else {
-        print('error: ${response.statusCode}');
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          return TransactionsSummary.fromJson(data);
+        } else {
+          print('error: ${response.statusCode}');
+        }
+      } catch (e) {
+        print(e);
       }
-    } catch (e) {
-      print(e);
     }
   }
 
@@ -68,31 +73,36 @@ class AnalyticsProvider {
 
 {totalIncome: 89737, totalExpenses: 652, currentBalance: 893310}
  */
-    try{
-      final response = await http.get(
-        url,
-        headers: {
-          // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
-          'User-ID': "2cbbbf55-81f0-4475-8fe0-e29c664b6aa3",
-          // Adding User-ID in the header
-          'Content-Type': 'application/json',
-        },
-      );
-      if(response.statusCode == 200){
-        // print(response.body);
-        final data = jsonDecode(response.body);
-        if (data is Map<String, dynamic>) {
-          return data;
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+
+    if(userId!=null){
+      try{
+        final response = await http.get(
+          url,
+          headers: {
+            // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
+            'User-ID': userId,
+            // Adding User-ID in the header
+            'Content-Type': 'application/json',
+          },
+        );
+        if(response.statusCode == 200){
+          // print(response.body);
+          final data = jsonDecode(response.body);
+          if (data is Map<String, dynamic>) {
+            return data;
+          } else {
+            print("Unexpected data format: ${response.body}");
+            return null;
+          }
         } else {
-          print("Unexpected data format: ${response.body}");
+          print("Failed to load data. Status code: ${response.body}");
           return null;
         }
-      } else {
-        print("Failed to load data. Status code: ${response.body}");
-        return null;
+      }catch(e){
+        print("exception with fetching balance overview $e");
       }
-    }catch(e){
-      print("exception with fetching balance overview $e");
     }
   }
   }

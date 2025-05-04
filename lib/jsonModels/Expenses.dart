@@ -5,6 +5,7 @@ import 'package:flutter_frontend/jsonModels/Expense.dart';
 
 //import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Expenses {
   final List<Expense> expenses;
@@ -19,17 +20,17 @@ class Expenses {
 
   static Future<List<Expense>?> fetchExpenses() async {
     final Uri url = Uri.parse(AppConfig.expensesEndPoint);
-    // final prefs = await SharedPreferences.getInstance();
-    // String? userId = prefs.getString('userId');
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-    // if (userId != null) {
+    if (userId != null) {
     try {
       final response = await http.get(
         url,
         headers: {
           // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
           // Adding User-ID in the header
-          'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
+          'user-id': userId,
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
@@ -44,7 +45,7 @@ class Expenses {
       }
     } catch (e) {
       print("Fetching expenses error $e");
-      //   }
+        }
     }
   }
 
@@ -58,32 +59,35 @@ class Expenses {
      */
     bool success = false;
     final Uri url = Uri.parse(AppConfig.expensesEndPoint);
-    // final prefs = await SharedPreferences.getInstance();
-    // String? userId = prefs.getString('userId');
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-        },
-        body: jsonEncode({
-          "title": newExpense['title'],
-          "amount": newExpense['amount'],
-          "description": newExpense['description'],
-          "frequency": newExpense['frequency'],
-          "category": newExpense['category']
-        }),
-      );
-      if (response.statusCode == 200) {
-        print('expense created: ${response.body}');
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-        success = true;
-        //success = false;
+    if(userId!=null){
+      try {
+        final response = await http.post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'user-id': userId,
+          },
+          body: jsonEncode({
+            "title": newExpense['title'],
+            "amount": newExpense['amount'],
+            "description": newExpense['description'],
+            "frequency": newExpense['frequency'],
+            "category": newExpense['category']
+          }),
+        );
+        if (response.statusCode == 200) {
+          print('expense created: ${response.body}');
+
+          success = true;
+          //success = false;
+        }
+      } catch (e) {
+        print("add expense error ${e}");
+        success = false;
       }
-    } catch (e) {
-      print("add expense error ${e}");
-      success = false;
     }
     return success;
   }
@@ -91,23 +95,27 @@ class Expenses {
   static Future<bool> deleteExpense(int id) async {
     final String url = "${AppConfig.expensesEndPoint}/$id";
     bool success = false;
-    try {
-      final response = await http.delete(Uri.parse(url),
-          headers: {
-            'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-          });
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        success = true; // Successfully deleted
-      } else {
-        print("Failed to delete expense: ${response.body}");
-        return false;
+    if(userId!=null){
+      try {
+        final response = await http.delete(Uri.parse(url),
+            headers: {
+              'user-id': userId,
+            });
+
+        if (response.statusCode == 200 || response.statusCode == 204) {
+          success = true; // Successfully deleted
+        } else {
+          print("Failed to delete expense: ${response.body}");
+          return false;
+        }
+      } catch (e) {
+        print("Error deleting expense: $e");
+        success = false;
       }
-    } catch (e) {
-      print("Error deleting expense: $e");
-      success = false;
     }
-
     return success;
   }
 
@@ -116,23 +124,28 @@ class Expenses {
     final String url = "${AppConfig.expensesEndPoint}/$id";
     Map<String, dynamic> filteredExpense = newExpense..removeWhere((key, value) => value == null);
 
-    try {
-      final response = await http.put(
-        Uri.parse(url),
-        headers: {
-          'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(filteredExpense),
-      );
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-      if (response.statusCode == 200) {
-        success = true;
+
+    if(userId!=null){
+      try {
+        final response = await http.put(
+          Uri.parse(url),
+          headers: {
+            'user-id': userId,
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(filteredExpense),
+        );
+
+        if (response.statusCode == 200) {
+          success = true;
+        }
+      } catch (e) {
+        print("Error updating expense: $e");
       }
-    } catch (e) {
-      print("Error updating expense: $e");
     }
-
     return success;
   }
 

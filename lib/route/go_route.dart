@@ -6,6 +6,7 @@ import 'package:flutter_frontend/pages/MainPage.dart';
 import 'package:flutter_frontend/pages/MainScaffoldPage.dart';
 import 'package:flutter_frontend/pages/Profile.dart';
 import 'package:flutter_frontend/pages/authPages/RegisterScreen.dart';
+import 'package:flutter_frontend/pages/chatPage/Chat.dart';
 import 'package:flutter_frontend/pages/surveyPages/SurveyScreens.dart';
 import 'package:flutter_frontend/requests/Authentication/StreamAuth.dart';
 import 'package:flutter_frontend/requests/Authentication/StreamAuthNotifier.dart';
@@ -80,6 +81,10 @@ class AppGoRouter {
         return null;
       },
       routes: [
+        GoRoute(
+          path: '/chat',
+          builder: (context, state) => Chat(),
+        ),
         GoRoute(path: '/survey', builder: (context, state) => SurveyScreen()),
         GoRoute(
           path: '/login',

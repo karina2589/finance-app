@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config/AppConfig.dart';
 import 'TransactionHistories.dart';
 import 'TransactionHistory.dart';
@@ -46,31 +47,36 @@ class TransactionData {
    'period': period.toString(), // e.g., 'week', 'month', 'year'
   },);
 
-  try{
-   final response = await http.get(url,  headers: {
-    // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
-    'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-    // 'user-id': userId,
-    'Content-Type': 'application/json',
-   },);
-   if(response.statusCode == 200){
-    print("analytics transactions : \n ${response.body}");
-    List<dynamic> data = jsonDecode(response.body);
-    String nameOfKey = period == 1? 'date' : 'month';
-    List<Map<String, dynamic>> parsedData = data
-        .map((item) => {
+  final prefs = await SharedPreferences.getInstance();
+  String? userId = prefs.getString('userId');
 
-     'Date': item[nameOfKey],
-     'Amount': (item['amount'] as num).toDouble(),
-    })
-        .toList();
+  if(userId!=null){
+   try{
+    final response = await http.get(url,  headers: {
+     // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // If using authentication
+     'user-id': userId,
+     // 'user-id': userId,
+     'Content-Type': 'application/json',
+    },);
+    if(response.statusCode == 200){
+     print("analytics transactions : \n ${response.body}");
+     List<dynamic> data = jsonDecode(response.body);
+     String nameOfKey = period == 1? 'date' : 'month';
+     List<Map<String, dynamic>> parsedData = data
+         .map((item) => {
 
-    return parsedData;
-   }else {
-    print(response.body);
+      'Date': item[nameOfKey],
+      'Amount': (item['amount'] as num).toDouble(),
+     })
+         .toList();
+
+     return parsedData;
+    }else {
+     print(response.body);
+    }
+   }catch(e){
+    print("error with getting transactions by period ${e}");
    }
-  }catch(e){
-   print("error with getting transactions by period ${e}");
   }
  }
 }

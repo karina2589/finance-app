@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_frontend/config/AppConfig.dart';
 import 'package:flutter_frontend/jsonModels/CardDetail.dart';
 import "package:http/http.dart" as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CardDetails{
   final List<CardDetail> details;
@@ -16,23 +17,28 @@ class CardDetails{
   
   static Future<List<CardDetail>?> fetchCardsDetails() async{
     final Uri url = Uri.parse(AppConfig.cardsDetailsEndPoint);
-    
-    try{
-      final response = await http.get(url,
-          headers: {
-            'user-id': '2cbbbf55-81f0-4475-8fe0-e29c664b6aa3',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          }
-      );
-      if(response.statusCode == 200){
-        List<dynamic> detailsData = jsonDecode(response.body);
-        return detailsData.map((detail) => CardDetail.fromJson(detail)).toList();
-      }else{
-        print("error with fetching card details ${response.body}");
+
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+
+    if(userId!=null){
+      try{
+        final response = await http.get(url,
+            headers: {
+              'user-id': userId,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            }
+        );
+        if(response.statusCode == 200){
+          List<dynamic> detailsData = jsonDecode(response.body);
+          return detailsData.map((detail) => CardDetail.fromJson(detail)).toList();
+        }else{
+          print("error with fetching card details ${response.body}");
+        }
+      }catch(e){
+        print("fetching card details exception $e");
       }
-    }catch(e){
-      print("fetching card details exception $e");
     }
   }
 }

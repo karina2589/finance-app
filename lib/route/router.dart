@@ -8,6 +8,7 @@ class AppPath {
   static const login = '/login';
   static const register = '/register';
   static const surveyPage = '/survey';
+  static const chatPage = '/chat';
 ///context.gp('/dashboard/dashboard-detail');
 }
 
@@ -20,6 +21,7 @@ class PathName {
   static const login = 'login';
   static const register = 'register';
   static const surveyPage = 'survey';
+  static const chatPage = 'chat';
 
 //context.goNamed(PathName.dashboard);
 }

@@ -6,6 +6,7 @@ import 'package:flutter_frontend/jsonModels/FileInfo.dart';
 import 'package:flutter_frontend/jsonModels/StatementTransaction.dart';
 import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BankStatement {
   /*
@@ -63,30 +64,35 @@ class BankStatement {
     });
     final request = http.MultipartRequest('POST', uri);
 
-    request.headers['user-id'] = "2cbbbf55-81f0-4475-8fe0-e29c664b6aa3";
-    request.fields['cardId'] = cardId.toString();
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-    request.files.add(
-      await http.MultipartFile.fromPath(
-        'bankstatement',
-        filePath,
-        contentType: MediaType('application', 'pdf'),
-      ),
-    );
+    if(userId!=null){
+      request.headers['user-id'] = "2cbbbf55-81f0-4475-8fe0-e29c664b6aa3";
+      request.fields['cardId'] = cardId.toString();
 
-    final response = await request.send();
-    final responseBody = await response.stream.bytesToString();
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'bankstatement',
+          filePath,
+          contentType: MediaType('application', 'pdf'),
+        ),
+      );
 
-    if (response.statusCode == 200) {
-      final json = jsonDecode(responseBody);
-      final List<StatementTransaction> transactions =
-      StatementTransaction.fromJsonList(json);
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
 
-      return BankStatement(statementTransactions: transactions);
-    } else {
-      print("❌ Upload failed: ${response.statusCode}");
-      print(responseBody);
-      return null;
+      if (response.statusCode == 200) {
+        final json = jsonDecode(responseBody);
+        final List<StatementTransaction> transactions =
+        StatementTransaction.fromJsonList(json);
+
+        return BankStatement(statementTransactions: transactions);
+      } else {
+        print("❌ Upload failed: ${response.statusCode}");
+        print(responseBody);
+        return null;
+      }
     }
   }
 }

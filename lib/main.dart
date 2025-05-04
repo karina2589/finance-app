@@ -32,7 +32,7 @@ void main() async {
         BlocProvider.of<IncomeBloc>(context),
         BlocProvider.of<ExpenseTransactionBloc>(context),
         BlocProvider.of<SavingTransactionBloc>(context),
-      ),
+      ), lazy: false,
     ),
   ], child: StreamAuthScope(
    child: MyApp(router: router,),)

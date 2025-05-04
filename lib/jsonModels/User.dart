@@ -97,6 +97,8 @@ class User {
 
   }) async {
     final Uri url = Uri.parse(AppConfig.profileEndPoint);
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
     Map<String, dynamic> body = {};
 
@@ -106,12 +108,12 @@ class User {
     if (dob != null) body["dob"] = dob;
     if (gender != null) body["gender"] = gender; // null не будет добавляться
 
-    if (body.isNotEmpty) {
+    if (body.isNotEmpty && userId!=null) {
       try {
         final http.Response res = await http.put(
           url,
           headers: {
-            "user-id" :"2cbbbf55-81f0-4475-8fe0-e29c664b6aa3",
+            "user-id" :userId,
             "Accept": "application/json",
             "Content-Type": "application/json",
           },

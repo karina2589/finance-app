@@ -28,6 +28,7 @@ class BankCardSwiper extends StatefulWidget {
 class _BankCardSwiperState extends State<BankCardSwiper> {
   List<CardDetail>? cardDetails = [];
   List<BankCard>? cards = [];
+  List<BankCard>? fetchedCards = [];
   bool isLoading = true;
   final PageController _pageController = PageController(viewportFraction: 0.5);
 
@@ -45,8 +46,18 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    fetchCards();
     context.read<IncomeBloc>().add(LoadIncomeEvent());
     context.read<CardBloc>().add(LoadCardEvent());
+  }
+
+  void fetchCards() async{
+    List<BankCard>? data = await BankCards.fetchCards();
+    if(data!=null){
+      setState(() {
+        cards = data;
+      });
+    }
   }
 
   //
@@ -71,6 +82,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
             return Center(child: CircularProgressIndicator(),);
           }
           else if(state is CardLoadedState){
+
             final List<BankCard>? cards = state.cards;
             return PageView.builder(
               padEnds: false,
@@ -91,7 +103,10 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                 return _buildIncomeCard(card);
               },
             );
-          }else{
+          }else if(state is CardEmptyState){
+            return _buildAddButton();
+          }
+          else{
             return Text("Cards loading error. Please check your connection");
           }
         })
@@ -111,7 +126,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                     color: Colors.black, fontSize: 20),
               ),
               IconButton(
-                  onPressed: () => _showIncomesDialog(),
+                  onPressed: () => _showIncomesDialog(cards: cards),
                   //display dialog
                   //update expenses list
                   icon: Icon(Icons.add_circle_outline))
@@ -251,8 +266,10 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
 
                           if (card == null) {
                             context.read<CardBloc>().add(AddCardEvent(cardName: newCard));
+                            fetchCards();
                           } else {
                             context.read<CardBloc>().add(UpdateCardEvent(updatedCardName: newCard, cardId: card.id));
+                            fetchCards();
                           }
                           Navigator.pop(context);
                         }
@@ -282,6 +299,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
           elevation: 4,
           color: Colors.white,
           child: Container(
+            width: MediaQuery.of(context).size.width* 0.45,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
@@ -322,7 +340,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                   Icon(icon, size: 50, color: Colors.grey),
                   SizedBox(height: 10),
                   Text((noInfoYet1),
-                    style: GoogleFonts.inder(
+                    style: GoogleFonts.poppins(
                         fontSize: 18, color: Colors.black54),
                   ),
                   Padding(
@@ -330,7 +348,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                     child: RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(
-                        style: GoogleFonts.inder(
+                        style: GoogleFonts.poppins(
                             fontSize: 16, color: Colors.black54),
                         children: [
                           TextSpan(text: noInfoYet1),
@@ -417,7 +435,7 @@ Widget _incomesDisplay(List<Income>? incomes, List<BankCard>? cards) {
 
 
 
-      void _showIncomesDialog({Income? income, int? id, List<BankCard>? cards})
+      void _showIncomesDialog({Income? income, int? id, required List<BankCard>? cards})
   {
     // Если редактируем, заполняем поля текущими данными, иначе оставляем пустыми
     incomeTitleController.text = income?.title ?? "";
@@ -437,7 +455,36 @@ Widget _incomesDisplay(List<Income>? incomes, List<BankCard>? cards) {
     // Выбранная карта (храним ID!)
     int? selectedCardId = income?.cardId;
 
-    //card id
+    // bool isCardsEmpty = cards ==null || cards.isEmpty ? true : false;
+    //
+    // if(isNewCard && isCardsEmpty){
+    //
+    //
+    //     showDialog(context: context,
+    //         builder: (BuildContext context) {
+    //           return Dialog(
+    //               backgroundColor: Colors.white,
+    //               shape: RoundedRectangleBorder(
+    //                 borderRadius: BorderRadius.circular(20),
+    //               ),
+    //             child: Padding(
+    //           padding: EdgeInsets.all(20),
+    //             child: Text("You can't add income without at least one created card. Please create cared first",
+    //             style: GoogleFonts.poppins(
+    //               fontSize: 18,
+    //               fontWeight: FontWeight.w500,
+    //               color: Colors.black,
+    //             ),),
+    //             )
+    //           );
+    //         }
+    //     );
+    //   }else{
+    //
+    //   }
+    // }
+    //
+    // //card id
 
     showModalBottomSheet(
       backgroundColor: Colors.white,

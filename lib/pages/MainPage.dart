@@ -72,7 +72,22 @@ class MainPageState extends State<MainPage>{
             ),
 
             // last 7 transactions
-            _transactionList(),
+            transactions.isEmpty?
+            Padding(padding: EdgeInsets.symmetric(vertical: 30),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.compare_arrows_rounded, size: 50, color: Colors.grey),
+                  SizedBox(height: 10),
+                  Text(
+                    "No transactions yet",
+                    style: GoogleFonts.poppins(fontSize: 18, color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),)
+            :_transactionList(),
 
             // saving cards
           ],

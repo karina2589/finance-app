@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_frontend/route/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -56,14 +57,16 @@ class _MainScaffoldPageState extends State<MainScaffoldPage> {
           ),
           actions: [
             Badge(
-              label: Text("3"),
+              // label: Text("3"),
               child: IconButton(
                 icon: const Icon(
-                  Icons.message_outlined,
+                  Icons.chat_bubble_rounded,
                   size: 30.0,
                 ),
                 tooltip: 'Show Snackbar',
-                onPressed: () {},
+                onPressed: () {
+                  context.push(AppPath.chatPage);
+                },
               ),
             ),
           ]),

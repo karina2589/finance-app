@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_frontend/bloc/expense_transactions_bloc/expense_transactions_bloc.dart';
+import 'package:flutter_frontend/bloc/income_transaction_bloc/income_transaction_bloc.dart';
 import 'package:flutter_frontend/bloc/savings_transacrtions_bloc/savings_transactions_bloc.dart';
 import 'package:flutter_frontend/models/AppTheme.dart';
 import 'package:flutter_frontend/requests/Authentication/StreamAuth.dart';
@@ -25,11 +26,12 @@ void main() async {
     BlocProvider<IncomeBloc>(create: (context) => IncomeBloc(), lazy: false,),
     BlocProvider<ExpenseBloc>(create: (context) => ExpenseBloc(), lazy: false,),
     BlocProvider<SavingBloc>(create: (context) => SavingBloc(), lazy: false,),
+    BlocProvider<IncomeTransactionBloc>(create: (context) => IncomeTransactionBloc(BlocProvider.of<IncomeBloc>(context)), lazy: false,),
     BlocProvider<ExpenseTransactionBloc>(create: (context) => ExpenseTransactionBloc(BlocProvider.of<ExpenseBloc>(context)), lazy: false),
     BlocProvider<SavingTransactionBloc>(create: (context) => SavingTransactionBloc(BlocProvider.of<SavingBloc>(context)), lazy: false,),
     BlocProvider<CardBloc>(
       create: (context) => CardBloc(
-        BlocProvider.of<IncomeBloc>(context),
+        BlocProvider.of<IncomeTransactionBloc>(context),
         BlocProvider.of<ExpenseTransactionBloc>(context),
         BlocProvider.of<SavingTransactionBloc>(context),
       ), lazy: false,

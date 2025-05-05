@@ -117,62 +117,67 @@ class RegisterScreenState extends State<RegisterScreen> {
                                 print('Password: ${_passController.text}');
                                 print('Confirm: ${_confirmPassController.text}');
 
-
-                                if (_passController.text == _confirmPassController.text && _usernameController.text.isNotEmpty) {
-                                  // Всё ок — продолжить регистрацию
-                                  // ScaffoldMessenger.of(context).showSnackBar(
-                                  //   SnackBar(content: Text('Successfully registered', style: GoogleFonts.poppins(
-                                  //       color: Colors.white,
-                                  //       fontSize: 16,
-                                  //     fontWeight: FontWeight.w600
-                                  //   ),),
-                                  //     backgroundColor: Colors.green,
-                                  //   ),
-                                  // );
-                                  register();
+                                //
+                                // if (_passController.text == _confirmPassController.text && _usernameController.text.isNotEmpty) {
+                                //   // Всё ок — продолжить регистрацию
+                                //   // ScaffoldMessenger.of(context).showSnackBar(
+                                //   //   SnackBar(content: Text('Successfully registered', style: GoogleFonts.poppins(
+                                //   //       color: Colors.white,
+                                //   //       fontSize: 16,
+                                //   //     fontWeight: FontWeight.w600
+                                //   //   ),),
+                                //   //     backgroundColor: Colors.green,
+                                //   //   ),
+                                //   // );
+                                //   register();
+                                // }
+                               if(_passController.text != _confirmPassController.text && _usernameController.text.isEmpty){
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Please fill all text fields correctly", style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600
+                                    ),), backgroundColor: Colors.red,),
+                                  );
+                                  return;
                                 }
-                                // else if(_passController.text != _confirmPassController.text && _usernameController.text.isEmpty){
-                                //   ScaffoldMessenger.of(context).showSnackBar(
-                                //     SnackBar(content: Text("Please fill all text fields correctly", style: GoogleFonts.poppins(
-                                //         color: Colors.white,
-                                //         fontSize: 16,
-                                //         fontWeight: FontWeight.w600
-                                //     ),), backgroundColor: Colors.red,),
-                                //   );
-                                // }
-                                //
-                                // else if(_passController.text.isEmpty && _confirmPassController.text.isEmpty && _usernameController.text.isEmpty){
-                                //   ScaffoldMessenger.of(context).showSnackBar(
-                                //     SnackBar(content: Text("Please fill all text fields correctly", style: GoogleFonts.poppins(
-                                //         color: Colors.white,
-                                //         fontSize: 16,
-                                //         fontWeight: FontWeight.w600
-                                //     ),), backgroundColor: Colors.red,),
-                                //   );
-                                // }
-                                // else if(_usernameController.text.isEmpty || _usernameController.text == null){
-                                //   ScaffoldMessenger.of(context).showSnackBar(
-                                //     SnackBar(content: Text("Username can't be empty", style: GoogleFonts.poppins(
-                                //         color: Colors.white,
-                                //         fontSize: 16,
-                                //         fontWeight: FontWeight.w600
-                                //     ),), backgroundColor: Colors.red,),
-                                //   );
-                                // }
-                                // else{
-                                //
-                                //   ScaffoldMessenger.of(context).showSnackBar(
-                                //     SnackBar(content: Text('Passwords are different', style: GoogleFonts.poppins(
-                                //       color: Colors.white,
-                                //       fontSize: 16,
-                                //         fontWeight: FontWeight.w600
-                                //     ),), backgroundColor: Colors.red,),
-                                //   );
-                                //   // Повторная проверка на всякий случай
-                                //   // setState(() {
-                                //   //   errorMessage = 'Passwords are different';
-                                //   // });
-                                // }
+
+                                if(_passController.text.isEmpty && _confirmPassController.text.isEmpty && _usernameController.text.isEmpty){
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Please fill all text fields correctly", style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600
+                                    ),), backgroundColor: Colors.red,),
+                                  );
+                                  return;
+                                }
+                                if(_usernameController.text.isEmpty || _usernameController.text == null){
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Username can't be empty", style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600
+                                    ),), backgroundColor: Colors.red,),
+                                  );
+                                  return;
+                                }
+                                if(_passController.text.trim() != _confirmPassController.text.trim()){
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Passwords are different', style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                        fontWeight: FontWeight.w600
+                                    ),), backgroundColor: Colors.red,),
+                                  );
+                                  // Повторная проверка на всякий случай
+                                  // setState(() {
+                                  //   errorMessage = 'Passwords are different';
+                                  // });
+                                  return;
+                                }
+                                register();
                               },
                               style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.amber),

@@ -60,7 +60,7 @@ class _MainScaffoldPageState extends State<MainScaffoldPage> {
               // label: Text("3"),
               child: IconButton(
                 icon: const Icon(
-                  Icons.chat_bubble_rounded,
+                  Icons.chat_bubble_outline_rounded,
                   size: 30.0,
                 ),
                 tooltip: 'Show Snackbar',

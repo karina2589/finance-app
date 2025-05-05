@@ -15,6 +15,11 @@ import 'package:flutter_frontend/jsonModels/Savings.dart';
 import 'package:flutter_frontend/jsonModels/TransactionHistories.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../bloc/income_transaction_bloc/income_transaction_bloc.dart';
+import '../bloc/income_transaction_bloc/income_transaction_event.dart';
+import '../bloc/income_transaction_bloc/income_transaction_state.dart';
+import '../jsonModels/PendingIncome.dart';
+
 // void main() {
 //   runApp(MaterialApp(
 //     home: Scaffold(
@@ -46,7 +51,7 @@ class _ActivityPageState extends State<ActivityPage> {
     super.initState();
     context.read<ExpenseTransactionBloc>().add(LoadExpenseTransactionEvent());
     context.read<SavingTransactionBloc>().add(LoadSavingsTransactionEvent());
-
+    context.read<IncomeTransactionBloc>().add(LoadIncomeTransactionEvent());
   }
 
   @override
@@ -55,6 +60,7 @@ class _ActivityPageState extends State<ActivityPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          _pendingIncomesBlocDisplay(context),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
             child: Align(
@@ -107,6 +113,225 @@ class _ActivityPageState extends State<ActivityPage> {
     );
   }
 
+  Widget _pendingIncomesBlocDisplay(BuildContext context){
+    return BlocListener<IncomeTransactionBloc, IncomeTransactionState>(
+      listener: (context, state){
+        print("pending transactions changed $state");
+        if(state is IncomeTransactionLoadedState){
+          setState(() {});
+        }
+      },
+      child: BlocBuilder<IncomeTransactionBloc, IncomeTransactionState>(
+          builder: (context, state){
+            if(state is IncomeTransactionLoadingState){
+              return Center(child: CircularProgressIndicator(color: Colors.black,));
+            }else if(state is IncomeTransactionLoadedState){
+              return _displayPendingList(state.pendingIncomes);
+            }else if(state is IncomeTransactionErrorMessageState){
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message, style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600
+                  ),), backgroundColor: Colors.red,),
+                );
+              });
+              return Center(child: Text("An error occurred", style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: Colors.red,
+              )));
+            }
+            else if(state is IncomeTransactionEmptyState){
+              return  Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft, child: Text(
+                        "Pending Incomes",
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          // fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                      ),
+                      Text(
+                        "here you will see the list of pending incomes that you need to confirm if you received the money",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          // fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ]
+                ),
+              );
+              // Text("you dont have pending incomes now",  style: GoogleFonts.poppins(
+              //   color: Colors.black, fontSize: 16, fontWeight: FontWeight.w400),);
+            }else{
+              return Text("this case was not considered, sorry");
+            }
+          }
+      ),
+    );
+  }
+
+  Widget _displayPendingList(List<PendingIncome>? pendingIncomes){
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          child: Column(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft, child: Text(
+                  "Pending Incomes",
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    // fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                ),
+                Text(
+                  "(you need to confirm that you received money to add them to your balance)",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    // fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ]
+          ),
+        ),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: pendingIncomes?.length,
+          itemBuilder: (context, index) {
+
+            return GestureDetector(
+                onTap: (){
+                  _confirmPendingIncome(pendingIncomes![index].id, pendingIncomes![index].amount, pendingIncomes![index].cardId);
+                },
+                child: Container(
+                    margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.green, width: 2), // Border color and width
+                      borderRadius: BorderRadius.circular(20), // Optional: rounded corners
+                    ),
+                    child: ListTile(
+                      leading: Container(
+                        width: 45, // Размер квадрата
+                        height: 45,
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50, // Белый фон
+                          borderRadius:
+                          BorderRadius.circular(20), // Можно сделать мягкие углы
+                        ),
+                        child: Icon(
+                          Icons.done_outline_rounded,
+                          color: Colors.green, // Синий цвет иконки
+                          size: 24,
+                        ),
+                      ),
+                      title: Text(
+                        "${pendingIncomes?[index].title}",
+                        style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w400),
+                      ),
+                      // subtitle: Text(
+                      //   "${pendingIncomes?[index].description?.toLowerCase() ?? ""}",
+                      //   style: GoogleFonts.poppins(
+                      //       fontSize: 14,
+                      //       color: Colors.grey,
+                      //       fontWeight: FontWeight.w400),
+                      // ),
+                      trailing: Text(
+                          "${((pendingIncomes?[index].amount ?? 0.0))}",
+                          style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w400)),
+                    ))
+            );
+          },
+          // ),
+        )
+      ],
+    );
+  }
+
+  void _confirmPendingIncome(int incomeId, double amount, int cardId){
+
+    showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context){
+          return Dialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+                padding: EdgeInsets.all(20),
+              child: SizedBox(
+                height: 200,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    'Confirm income',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 15),
+                  Text(
+                    '$amount will be added to your balance',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 15),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black),
+                      onPressed: (){
+                        Map<String, dynamic> newIncomeTransaction = {
+                          "amount": amount,
+                          "incomeId": incomeId,
+                          "cardId": cardId // добавляем ID карты в транзакцию
+                        };
+                        context.read<IncomeTransactionBloc>().add(AddIncomeTransactionEvent(newIncomeTransaction: newIncomeTransaction));
+                        Navigator.pop(context);
+                      },
+                      child: Text("Confirm",   style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white,
+                      ),)
+                  )
+                ],
+              ),
+              )
+            )
+          );
+        }
+    );
+  }
+
+
   Widget _displayExpenseTransactionBloc(BuildContext context, String noInfoYet1,
       IconData icon){
     return BlocListener<ExpenseTransactionBloc, ExpenseTransactionState>(
@@ -114,13 +339,24 @@ class _ActivityPageState extends State<ActivityPage> {
       print("State changed: $state");
       if (state is ExpenseTransactionLoadedState) {
         setState(() {});  // Принудительное обновление UI
+      }else if(state is ExpenseTransactionErrorMessageState){
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message, style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600
+            ),), backgroundColor: Colors.red,),
+          );
+        });
       }
     },
     child: BlocBuilder<ExpenseTransactionBloc, ExpenseTransactionState>(
     builder: (context, state){
       if(state is ExpenseTransactionLoadingState){
         return Center(child: CircularProgressIndicator());
-      }else if (state is ExpenseTransactionEmptyState) {
+      }
+      else if (state is ExpenseTransactionEmptyState) {
         return Center(
           child: SizedBox(
             width: double.infinity, // Растягивает Column на всю ширину
@@ -148,7 +384,9 @@ class _ActivityPageState extends State<ActivityPage> {
         return _listOfExpenseProgress(state.expenses, state.cards);
       }
       else{
-        return Text("error");
+        context.read<ExpenseTransactionBloc>().add(LoadExpenseTransactionEvent());
+        return Center(child: CircularProgressIndicator());
+// return Text("error");
       }
     }
     )
@@ -161,13 +399,30 @@ class _ActivityPageState extends State<ActivityPage> {
           print("State changed: $state");
           if (state is SavingTransactionLoadedState) {
             setState(() {});  // Принудительное обновление UI
+          }else if(state is SavingTransactionsErrorMessageState){
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    state.message,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            });
           }
         },
         child: BlocBuilder<SavingTransactionBloc, SavingsTransactionState>(
             builder: (context, state){
               if(state is SavingTransactionLoadingState){
                 return Center(child: CircularProgressIndicator());
-              }else if (state is SavingTransactionEmptyState) {
+              }
+              else if (state is SavingTransactionEmptyState) {
                 return Center(
                   child: SizedBox(
                     width: double.infinity, // Растягивает Column на всю ширину
@@ -195,7 +450,8 @@ class _ActivityPageState extends State<ActivityPage> {
                 return _listOfSavingProgress(state.saving, state.cards);
               }
               else{
-                return Text("error");
+                context.read<SavingTransactionBloc>().add(LoadSavingsTransactionEvent());
+                return Center(child: CircularProgressIndicator());
               }
             }
         )

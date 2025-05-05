@@ -61,7 +61,7 @@ class StreamAuth {
 
   Stream<String?> get onCurrentUserChanged => _userStreamController.stream;
 
-  Future<bool> login(String username, String password) async {
+  Future<String> login(String username, String password) async {
     final response = await http.post(
       Uri.parse(loginEndPoint),
       headers: {'Content-Type':'application/json'},
@@ -77,10 +77,13 @@ class StreamAuth {
        await saveUserToken(token, user);
       print('logging success');
 
-     return true;
+     return "LoggedIn";
     }else{
       print('Login failed: ${response.body}');
-      return false;
+      final errorMessage = jsonDecode(response.body);
+      String message = errorMessage['message'];
+      print(message);
+      return message;
     }
   }
 

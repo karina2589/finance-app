@@ -19,3 +19,8 @@ class ExpenseTransactionLoadingErrorState extends ExpenseTransactionState{}
 class ExpenseTransactionInitialState extends ExpenseTransactionState{}
 class ExpenseTransactionEmptyState extends ExpenseTransactionState{}
 class ExpenseTransactionUpdatedState extends ExpenseTransactionState{}
+class ExpenseTransactionErrorMessageState extends ExpenseTransactionState{
+  final String message;
+  ExpenseTransactionErrorMessageState({required this.message});
+}
+class ExpenseTransactionClearErrorState extends ExpenseTransactionState{}

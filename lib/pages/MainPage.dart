@@ -3,7 +3,6 @@ import 'package:flutter_frontend/jsonModels/AnalyticsProvider.dart';
 import 'package:flutter_frontend/jsonModels/TransactionHistories.dart';
 import 'package:flutter_frontend/jsonModels/TransactionHistory.dart';
 import 'package:flutter_frontend/models/AppTheme.dart';
-import 'package:flutter_frontend/models/DismissibleTasks.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 //
@@ -50,8 +49,6 @@ class MainPageState extends State<MainPage>{
       });
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -116,18 +113,29 @@ class MainPageState extends State<MainPage>{
               end: Alignment.bottomRight,
             ),
           ),
-          child: Column(
+          child: balanceOverview.isEmpty?
+          Center(child: CircularProgressIndicator(color: Colors.black,),):
+
+          Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [_columnText(context, 'Total Balance', balanceOverview['currentBalance'] ?? 0)],
+                children: [_columnText(context, 'Total Balance',( balanceOverview['currentBalance'] as num).toDouble() ?? 0.0)],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _columnText(context, 'Income', balanceOverview['totalIncome'] ?? 0),
-                  _columnText(context, 'Expenses', balanceOverview['totalExpenses']?? 0)
+                  _columnText(
+                    context,
+                    'Income',
+                    (balanceOverview['totalIncome'] as num?)?.toDouble() ?? 0.0,
+                  ),
+                  _columnText(
+                    context,
+                    'Expenses',
+                    (balanceOverview['totalExpenses'] as num?)?.toDouble() ?? 0.0,
+                  ),
                 ],
               )
             ],
@@ -137,7 +145,7 @@ class MainPageState extends State<MainPage>{
     );
   }
 
-  Widget _columnText(BuildContext context, String title, int subtitle) {
+  Widget _columnText(BuildContext context, String title, double subtitle) {
     final formatter = NumberFormat('#,###');
     String formatted = "${formatter.format(subtitle)} KZT";
 
@@ -180,14 +188,14 @@ class MainPageState extends State<MainPage>{
               amount = " - ${transactions[index].amount}";
             }
 
-            if(transactions[index].type.toLowerCase() == "saving"){
-              title = transactions[index].saving!['title'];
-            }else if(transactions[index].type.toLowerCase() == "expense"){
-              title = transactions[index].expense!['title'];
-            }else if(transactions[index].type.toLowerCase() == "income") {
-              title = transactions[index].income!['title'];
-            }else{
-              title =  "not defined";
+            if (transactions[index].type.toLowerCase() == "saving") {
+              title = transactions[index].saving?['title'] ?? "not defined";
+            } else if (transactions[index].type.toLowerCase() == "expense") {
+              title = transactions[index].expense?['title'] ?? "not defined";
+            } else if (transactions[index].type.toLowerCase() == "income") {
+              title = transactions[index].income?['title'] ?? "not defined";
+            } else {
+              title = "not defined";
             }
             return Container(
               decoration: BoxDecoration(
@@ -253,68 +261,6 @@ class MainPageState extends State<MainPage>{
           ),
         SizedBox(height: 20),
       ],
-    );
-  }
-
-  Widget _savingsCard(BuildContext context, String savingsName,
-      IconData saveIcon, double savingsPercent) {
-    return InkWell(
-      child: Container(
-          width: MediaQuery.of(context).size.width / 2 - 10,
-          height: (MediaQuery.of(context).size.width / 2 - 10) * 0.6,
-          margin: EdgeInsets.all(5.0),
-          child: Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25.0)),
-            color: AppTheme.widgetColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Icon(
-                //   saveIcon,
-                //   size: 70,
-                //   color: Colors.green.shade500,
-                // ),
-                Text(savingsName,
-                    style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 20),
-                Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width / 2 * 0.8,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                    ),
-                    Container(
-                      width: (MediaQuery.of(context).size.width / 2 * 0.8) *
-                          savingsPercent,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade500,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                        '\$ 750',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    )
-                  ],
-                ),
-              ],
-            ),
-          )),
-      // onTap: () => Navigator.push(
-      //       context,
-      //       MaterialPageRoute(builder: (context) => Savings()),
-      //     )
     );
   }
 }

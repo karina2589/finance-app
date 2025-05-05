@@ -5,6 +5,9 @@ import 'package:flutter_frontend/bloc/expenses_bloc/expense_bloc.dart';
 import 'package:flutter_frontend/bloc/expenses_bloc/expense_event.dart';
 import 'package:flutter_frontend/bloc/expenses_bloc/expense_state.dart';
 import 'package:flutter_frontend/bloc/income_bloc/income_bloc.dart';
+import 'package:flutter_frontend/bloc/income_transaction_bloc/income_transaction_bloc.dart';
+import 'package:flutter_frontend/bloc/income_transaction_bloc/income_transaction_event.dart';
+import 'package:flutter_frontend/bloc/income_transaction_bloc/income_transaction_state.dart';
 import 'package:flutter_frontend/bloc/savings_bloc/savings_bloc.dart';
 import 'package:flutter_frontend/bloc/savings_bloc/savings_event.dart';
 import 'package:flutter_frontend/bloc/savings_bloc/savings_state.dart';
@@ -12,6 +15,7 @@ import 'package:flutter_frontend/jsonModels/BankCard.dart';
 import 'package:flutter_frontend/jsonModels/BankCards.dart';
 import 'package:flutter_frontend/jsonModels/Expense.dart';
 import 'package:flutter_frontend/config/ExpenseCategories.dart';
+import 'package:flutter_frontend/jsonModels/PendingIncome.dart';
 import 'package:flutter_frontend/models/AppTheme.dart';
 import 'package:flutter_frontend/models/BankCardSwiper.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -84,7 +88,6 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
         children: [
           //  CardSwiper(),
           BankCardSwiper(),
-
           Divider(
             indent: 10,
             endIndent: 10,
@@ -229,7 +232,7 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
       child: BlocBuilder<SavingBloc, SavingState>(
           builder: (context, state){
             if(state is SavingsLoadingState){
-              return Center(child: CircularProgressIndicator());
+              return Center(child: CircularProgressIndicator(color: Colors.black));
             }else if(state is SavingsLoadedState){
               return _savingsDisplayRounded(state.savings);
             }else if(state is SavingEmptyState){
@@ -241,14 +244,14 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
                     SizedBox(height: 10),
                     Text(
                       "No savings yet",
-                      style: GoogleFonts.inder(fontSize: 18, color: Colors.black54),
+                      style: GoogleFonts.poppins(fontSize: 18, color: Colors.black54),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: RichText(
                         textAlign: TextAlign.center,
                         text: TextSpan(
-                          style: GoogleFonts.inder(fontSize: 16, color: Colors.black54),
+                          style: GoogleFonts.poppins(fontSize: 16, color: Colors.black54),
                           children: [
                             TextSpan(text: noInfoYet1),
                             WidgetSpan(

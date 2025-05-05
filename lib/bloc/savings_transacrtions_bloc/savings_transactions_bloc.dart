@@ -41,10 +41,14 @@ class SavingTransactionBloc extends Bloc<SavingsTransactionEvent, SavingsTransac
     on<AddSavingsTransactionEvent>((event, emit) async{
       //emit(ExpenseLoadingState());
       try{
-        bool success = await TransactionHistories.addTransaction(event.newSavingTransaction, "saving");
-        if(success){
-          emit(SavingTransactionUpdatedState());
-          add(LoadSavingsTransactionEvent());
+        String? success = await TransactionHistories.addTransaction(event.newSavingTransaction, "saving");
+        if(success!=null) {
+          if( success == 'success'){
+            emit(SavingTransactionUpdatedState());
+            add(LoadSavingsTransactionEvent());
+          }else{
+            emit(SavingTransactionsErrorMessageState(message: success));
+          }
         }
       }catch(e){
         emit(SavingTransactionLoadingErrorState());
@@ -53,10 +57,14 @@ class SavingTransactionBloc extends Bloc<SavingsTransactionEvent, SavingsTransac
     on<UpdateSavingsTransactionEvent>((event, emit) async{
       // emit(ExpenseLoadingState());
       try{
-        bool success = await TransactionHistories.updateTransaction(event.updatedSavingTransaction, event.savingId);
-        if(success){
-          emit(SavingTransactionUpdatedState());
-          add(LoadSavingsTransactionEvent());
+        String? success = await TransactionHistories.updateTransaction(event.updatedSavingTransaction, event.savingId);
+        if(success!=null) {
+          if( success == 'success'){
+            emit(SavingTransactionUpdatedState());
+            add(LoadSavingsTransactionEvent());
+          }else{
+            emit(SavingTransactionsErrorMessageState(message: success));
+          }
         }
       }catch(e){
         emit(SavingTransactionLoadingErrorState());
@@ -65,10 +73,14 @@ class SavingTransactionBloc extends Bloc<SavingsTransactionEvent, SavingsTransac
     on<DeleteSavingsTransactionEvent>((event, emit) async{
       // emit(ExpenseLoadingState());
       try{
-        bool success = await TransactionHistories.deleteTransaction(event.savingTransactionId);
-        if(success){
-          emit(SavingTransactionUpdatedState());
-          add(LoadSavingsTransactionEvent());
+        String? success = await TransactionHistories.deleteTransaction(event.savingTransactionId);
+        if(success!=null) {
+          if( success == 'success'){
+            emit(SavingTransactionUpdatedState());
+            add(LoadSavingsTransactionEvent());
+          }else{
+            emit(SavingTransactionsErrorMessageState(message: success));
+          }
         }
       }catch(e){
         emit(SavingTransactionLoadingErrorState());

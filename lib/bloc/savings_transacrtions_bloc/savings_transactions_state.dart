@@ -18,3 +18,8 @@ class SavingTransactionLoadingErrorState extends SavingsTransactionState{}
 class SavingTransactionInitialState extends SavingsTransactionState{}
 class SavingTransactionEmptyState extends SavingsTransactionState{}
 class SavingTransactionUpdatedState extends SavingsTransactionState{}
+
+class SavingTransactionsErrorMessageState extends SavingsTransactionState{
+  final String message;
+  SavingTransactionsErrorMessageState({required this.message});
+}

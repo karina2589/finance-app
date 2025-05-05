@@ -39,17 +39,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
     });
     final success = await StreamAuthScope.of(context).login(_usernameController.text.trim(), _passController.text.trim());
+    _errorMessage = success;
 
-    if (success) {
+    if (success == "LoggedIn") {
       if (mounted) {
 
        // context.go(AppPath.mainPage); // Navigate to main page after login
 
       }
     } else {
-      setState(() {
-        _errorMessage = "Login failed. Please check your credentials.";
-      });
+      // setState(() {
+      //   _errorMessage = "Login failed. Please check your credentials.";
+      // });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_errorMessage!, style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600
+        ),), backgroundColor: Colors.red,),
+      );
     }
 
     setState(() {
@@ -159,14 +167,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   height: 15,
                 ),
-                 Text(
-                  'Forget Password?',
-                  style: GoogleFonts.poppins(
-                    color: Colors.amber,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                //  Text(
+                //   'Forget Password?',
+                //   style: GoogleFonts.poppins(
+                //     color: Colors.amber,
+                //     fontSize: 14,
+                //     fontWeight: FontWeight.w500,
+                //   ),
+                // ),
               ],
             ),
           ),

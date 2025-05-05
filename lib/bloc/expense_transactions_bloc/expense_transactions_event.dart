@@ -20,3 +20,7 @@ class DeleteExpenseTransactionEvent extends ExpenseTransactionEvent{
   final int expenseTransactionId;
   DeleteExpenseTransactionEvent({required this.expenseTransactionId});
 }
+class ExpenseTransactionShowErrorEvent extends ExpenseTransactionEvent{
+  final String message;
+  ExpenseTransactionShowErrorEvent({required this.message});
+}

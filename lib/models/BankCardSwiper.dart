@@ -12,10 +12,14 @@ import 'package:flutter_frontend/jsonModels/CardDetail.dart';
 import 'package:flutter_frontend/jsonModels/CardDetails.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../bloc/income_transaction_bloc/income_transaction_bloc.dart';
+import '../bloc/income_transaction_bloc/income_transaction_event.dart';
+import '../bloc/income_transaction_bloc/income_transaction_state.dart';
 import '../config/Frequency.dart';
 import '../config/IncomeCategories.dart';
 import '../jsonModels/Income.dart';
 import '../jsonModels/Incomes.dart';
+import '../jsonModels/PendingIncome.dart';
 
 class BankCardSwiper extends StatefulWidget {
   //final VoidCallback updateUI;
@@ -49,6 +53,7 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
     fetchCards();
     context.read<IncomeBloc>().add(LoadIncomeEvent());
     context.read<CardBloc>().add(LoadCardEvent());
+    context.read<IncomeTransactionBloc>().add(LoadIncomeTransactionEvent());
   }
 
   void fetchCards() async{
@@ -95,11 +100,6 @@ class _BankCardSwiperState extends State<BankCardSwiper> {
                 }
 
                 final card = cards[index];
-                // final cardDetail = cardDetails?[index];
-                // final cardDetail = (cardDetails != null &&
-                //     index < cardDetails!.length)
-                //     ? cardDetails![index]
-                //     : null;
                 return _buildIncomeCard(card);
               },
             );
@@ -455,37 +455,6 @@ Widget _incomesDisplay(List<Income>? incomes, List<BankCard>? cards) {
     // Выбранная карта (храним ID!)
     int? selectedCardId = income?.cardId;
 
-    // bool isCardsEmpty = cards ==null || cards.isEmpty ? true : false;
-    //
-    // if(isNewCard && isCardsEmpty){
-    //
-    //
-    //     showDialog(context: context,
-    //         builder: (BuildContext context) {
-    //           return Dialog(
-    //               backgroundColor: Colors.white,
-    //               shape: RoundedRectangleBorder(
-    //                 borderRadius: BorderRadius.circular(20),
-    //               ),
-    //             child: Padding(
-    //           padding: EdgeInsets.all(20),
-    //             child: Text("You can't add income without at least one created card. Please create cared first",
-    //             style: GoogleFonts.poppins(
-    //               fontSize: 18,
-    //               fontWeight: FontWeight.w500,
-    //               color: Colors.black,
-    //             ),),
-    //             )
-    //           );
-    //         }
-    //     );
-    //   }else{
-    //
-    //   }
-    // }
-    //
-    // //card id
-
     showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
@@ -616,7 +585,7 @@ Widget _incomesDisplay(List<Income>? incomes, List<BankCard>? cards) {
                         onPressed: () {
                           context.read<IncomeBloc>().add(DeleteIncomeEvent(incomeId: income.id));
                          // deleteIncome(income.id);
-                          //Navigator.pop(context);
+                          Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red),

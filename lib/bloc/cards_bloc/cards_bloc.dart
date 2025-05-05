@@ -5,7 +5,9 @@ import 'package:flutter_frontend/bloc/cards_bloc/cards_event.dart';
 import 'package:flutter_frontend/bloc/cards_bloc/cards_state.dart';
 import 'package:flutter_frontend/bloc/expense_transactions_bloc/expense_transactions_bloc.dart';
 import 'package:flutter_frontend/bloc/expense_transactions_bloc/expense_transactions_state.dart';
-import 'package:flutter_frontend/bloc/income_bloc/income_bloc.dart';
+import 'package:flutter_frontend/bloc/income_bloc/income_event.dart';
+import 'package:flutter_frontend/bloc/income_transaction_bloc/income_transaction_bloc.dart';
+import 'package:flutter_frontend/bloc/income_transaction_bloc/income_transaction_state.dart';
 import 'package:flutter_frontend/bloc/savings_transacrtions_bloc/savings_transactions_bloc.dart';
 import 'package:flutter_frontend/bloc/savings_transacrtions_bloc/savings_transactions_state.dart';
 import 'package:flutter_frontend/jsonModels/BankCard.dart';
@@ -14,14 +16,14 @@ import 'package:flutter_frontend/jsonModels/BankCards.dart';
 import '../income_bloc/income_state.dart';
 
 class CardBloc extends Bloc<CardEvent, CardState>{
-  late final StreamSubscription incomeBlocSubscription; // Подписка на доходы
+  late final StreamSubscription incomeTransactionBlocSubscription; // Подписка на доходы
   late final StreamSubscription expenseTransactionBlocSubscription;
   late final StreamSubscription savingTransactionBlocSubscription;
 
-  CardBloc(IncomeBloc incomeBloc, ExpenseTransactionBloc expenseTransactionBloc, SavingTransactionBloc savingTransactionBloc) : super(CardInitialState()) {
-    incomeBlocSubscription = incomeBloc.stream.listen((incomeState) {
-      if (incomeState is IncomeUpdatedState) {
-        print("IncomeBloc изменился → обновляем карточки");
+  CardBloc(IncomeTransactionBloc incomeTransactionBloc, ExpenseTransactionBloc expenseTransactionBloc, SavingTransactionBloc savingTransactionBloc) : super(CardInitialState()) {
+    incomeTransactionBlocSubscription = incomeTransactionBloc.stream.listen((incomeState) {
+      if (incomeState is IncomeTransactionUpdatedState) {
+        print("IncomeTransactionBloc изменился → обновляем карточки");
         add(LoadCardEvent());
       }
     });
@@ -40,7 +42,7 @@ class CardBloc extends Bloc<CardEvent, CardState>{
       }
     });
     on<LoadCardEvent>((event, emit) async{
-      print("Load Card enent is triggered");
+      print("Load Card event is triggered");
       emit(CardLoadingState());
       try{
         final List<BankCard>? cards = await BankCards.fetchCards();

@@ -96,17 +96,26 @@ class Incomes {
   static Future<bool> deleteIncome(int id) async {
     String url = "${AppConfig.incomesEndPoint}/$id";
     bool succes = false;
+    final prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
 
-    try {
-      final response = await http.delete(Uri.parse(url));
-      if (response.statusCode == 200) {
-        succes = true;
-        print("income deleted successfully");
-      } else {
-        print("error with deleting income ${response.body}");
+    if(userId!=null) {
+      try {
+        final response = await http.delete(Uri.parse(url),
+          headers: {
+            'user-id': userId,
+            'Content-Type': 'application/json',
+          },
+        );
+        if (response.statusCode == 200) {
+          succes = true;
+          print("income deleted successfully");
+        } else {
+          print("error with deleting income ${response.body}");
+        }
+      } catch (e) {
+        print("error with deleting income $e");
       }
-    } catch (e) {
-      print("error with deleting income $e");
     }
     return succes;
   }

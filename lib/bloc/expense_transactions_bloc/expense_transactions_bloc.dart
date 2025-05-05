@@ -34,6 +34,7 @@ class ExpenseTransactionBloc extends Bloc<ExpenseTransactionEvent, ExpenseTransa
           emit(ExpenseTransactionEmptyState());
         }else{
           emit(ExpenseTransactionLoadedState(expenses: expenses, cards: cards));
+          // add(LoadExpenseTransactionEvent());
         }
       }catch(e){
         emit(ExpenseTransactionLoadingErrorState());
@@ -42,10 +43,16 @@ class ExpenseTransactionBloc extends Bloc<ExpenseTransactionEvent, ExpenseTransa
     on<AddExpenseTransactionEvent>((event, emit) async{
       //emit(ExpenseLoadingState());
       try{
-        bool success = await TransactionHistories.addTransaction(event.newExpenseTransaction, "expense");
-        if(success){
-          emit(ExpenseTransactionUpdatedState());
-          add(LoadExpenseTransactionEvent());
+        String? success = await TransactionHistories.addTransaction(event.newExpenseTransaction, "expense");
+        if(success!=null){
+          if(success == 'success'){
+            emit(ExpenseTransactionUpdatedState());
+            add(LoadExpenseTransactionEvent());
+          }
+          else{
+            emit(ExpenseTransactionErrorMessageState(message: success));
+            // add(ExpenseTransactionShowErrorEvent(message: success));
+          }
         }
       }catch(e){
         emit(ExpenseTransactionLoadingErrorState());
@@ -54,10 +61,14 @@ class ExpenseTransactionBloc extends Bloc<ExpenseTransactionEvent, ExpenseTransa
     on<UpdateExpenseTransactionEvent>((event, emit) async{
       // emit(ExpenseLoadingState());
       try{
-        bool success = await TransactionHistories.updateTransaction(event.updatedExpenseTransaction, event.expenseId);
-        if(success){
-          emit(ExpenseTransactionUpdatedState());
-          add(LoadExpenseTransactionEvent());
+        String? success = await TransactionHistories.updateTransaction(event.updatedExpenseTransaction, event.expenseId);
+        if(success!=null){
+          if(success == 'success'){
+            emit(ExpenseTransactionUpdatedState());
+            add(LoadExpenseTransactionEvent());
+          }else{
+            emit(ExpenseTransactionErrorMessageState(message: success));
+          }
         }
       }catch(e){
         emit(ExpenseTransactionLoadingErrorState());
@@ -66,10 +77,14 @@ class ExpenseTransactionBloc extends Bloc<ExpenseTransactionEvent, ExpenseTransa
     on<DeleteExpenseTransactionEvent>((event, emit) async{
       // emit(ExpenseLoadingState());
       try{
-        bool success = await TransactionHistories.deleteTransaction(event.expenseTransactionId);
-        if(success){
-          emit(ExpenseTransactionUpdatedState());
-          add(LoadExpenseTransactionEvent());
+        String? success = await TransactionHistories.deleteTransaction(event.expenseTransactionId);
+        if(success!=null){
+          if(success == 'success'){
+            emit(ExpenseTransactionUpdatedState());
+            add(LoadExpenseTransactionEvent());
+          }else{
+            emit(ExpenseTransactionErrorMessageState(message: success));
+          }
         }
       }catch(e){
         emit(ExpenseTransactionLoadingErrorState());

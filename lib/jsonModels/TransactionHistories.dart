@@ -75,7 +75,7 @@ class TransactionHistories{
     }
   }
 
-  static Future<bool> addTransaction(Map<String, dynamic> newTransaction, String transactionType) async{
+  static Future<String?> addTransaction(Map<String, dynamic> newTransaction, String transactionType) async{
     String url = "";
     if(transactionType == "expense"){
       url = AppConfig.expenseTransactionsEndPoint;
@@ -83,10 +83,12 @@ class TransactionHistories{
     if(transactionType == 'saving'){
       url = AppConfig.savingTransactionsEndPoint;
     }
+    if(transactionType == "income"){
+      url = AppConfig.incomeTransactionEndPoint;
+    }
 
-
-    bool success  =false;
     Map<String, dynamic> filteredExpense = newTransaction..removeWhere((key, value) => value == null);
+    String status = '';
 
     final prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('userId');
@@ -102,39 +104,48 @@ class TransactionHistories{
         );
 
         if (response.statusCode == 200) {
-          success = true;
+          status = "success";
         }else{
           print(response.body);
+          final errorMessage = jsonDecode(response.body);
+          String message = errorMessage['message'];
+          print(message);
+          status = message;
+
         }
       } catch (e) {
-        print("Error updating expense: $e");
+        print("Error adding expense: $e");
+        status =  "something went wrong, try later";
       }
+      return status;
     }
-
-    return success;
   }
 
-  static Future<bool> deleteTransaction(int id) async{
+  static Future<String?> deleteTransaction(int id) async{
+
     String url = "${AppConfig.transactionsEndPoint}/$id";
-    bool success = false;
+    String status = '';
     
     try{
       final response = await http.delete(Uri.parse(url));
       
       if(response.statusCode == 200){
-        success = true;
+        status = "success";
         print("transaction successfully deleted");
       }else{
         print("error with deleting transaction ${response.body}");
+        final errorMessage = jsonDecode(response.body);
+        String message = errorMessage['message'];
+        status = message;
       }
     }catch(e){
       print("error with deleting transaction $e");
     }
-    return success;
+    return status;
   }
 
-  static Future<bool> updateTransaction(Map<String, dynamic> updatedTransaction, int id) async{
-    bool success = false;
+  static Future<String?> updateTransaction(Map<String, dynamic> updatedTransaction, int id) async{
+    String status = '';
     Map<String, dynamic> filteredTransaction = updatedTransaction..removeWhere((key, value) => value == null);
 
     String url = "${AppConfig.transactionsEndPoint}/$id";
@@ -152,17 +163,20 @@ class TransactionHistories{
         );
 
         if(response.statusCode == 200){
-          success = true;
+          status = 'success';
           print("transaction updated");
         }else{
           print("error updating transaction ${response.body}");
+          final errorMessage = jsonDecode(response.body);
+          String message = errorMessage['message'];
+          status = message;
         }
       }catch(e){
         print("exception caught for transaction update $e");
       }
     }
 
-    return success;
+    return status;
   }
 
   static Future<List<TransactionHistory>?> fetchTransactionsByType(String type) async{

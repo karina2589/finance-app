@@ -1,6 +1,14 @@
-# flutter_frontend
+# Balance Box 
 
-flutter_frontend
+BalanceBox is a finance management application created to
+help users be more fiscally responsible and achieve financial
+freedom. Finance management can be a tedious and confusing
+task. Traditional methods are often time consuming and
+difficult for individuals. BalanceBox aims to make this process
+easier and more intuitive for users!
+
+![image](https://github.com/user-attachments/assets/21943cb6-5284-44ac-8d7e-84de653e938b)
+
 
 ## Getting Started
 
